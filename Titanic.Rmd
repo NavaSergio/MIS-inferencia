@@ -1,0 +1,77 @@
+---
+title: "Titanic"
+output: pdf_document
+date: "2022-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Titanic
+
+
+```{r bibliotecas, echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+library(readr)
+library(tidyverse)
+library(infer)
+#library(stests)
+library(knitr)
+library(summarytools)
+```
+
+Trabajaremos con el Dataset **Titanic**
+
+```{r, echo=FALSE, warning=FALSE, error=FALSE}
+TitanicT <-read_csv("titanic/train.csv",show_col_types = FALSE)
+```
+
+
+```{r, results='asis',echo=FALSE}
+TitanicT %>% head() %>% kable(caption = "Primeros registros de la base de datos Titanic")
+TitanicT %>% dfSummary(style='grid',  max.distinct.values = 5, plain.ascii = FALSE, graph.col = FALSE)
+```
+
+```{r, results='asis',echo=FALSE}
+stby(TitanicT, TitanicT$Sex, dfSummary,  max.distinct.values = 5, plain.ascii = FALSE,graph.col = FALSE)
+
+```
+
+
+1. ¿La varianza de las edades de quienes sobrevivieron es diferente para ambos grupos?
+2. Con base en la respuesta anterior, prueba si las edades promedio son iguales o diferentes para quienes sobrevivieron  o no?
+
+```{r}
+TitanicT %>% ggplot(aes(x=Age,colour=as.factor(Survived),group=Survived)) +
+  geom_density()
+TitanicT %>% ggplot(aes(x=as.factor(Survived), y=Age)) +
+  geom_boxplot()
+```
+
+
+```{r}
+TitanicT %>% group_by(Survived) %>%  summarise(varAge = var(Age,na.rm = T))
+var.test( Age ~ Survived, data = TitanicT, conf.level = 0.95)
+```
+
+```{r}
+t.test(Age ~ Survived, data = TitanicT, conf.level = 0.95)
+```
+
+Se dice que aproximadamente una tercera parte de la gente murió en el Titanic, estos datos respaldan esta afirmación
+
+```{r}
+prop.test(sum(TitanicT$Survived),851,p=1/3)
+```
+
+
+```{r}
+prop.test(sum(TitanicT$Sex=="female"),851,p=.5)
+```
+
+
+```{r}
+(tabla<- with(TitanicT,addmargins(table(Sex,Survived))))
+with(TitanicT,prop.table(table(Sex,Survived),margin = 1))
+prop.test(x=c(233,109),n=c(314,577),alternative = "greater")
+```
