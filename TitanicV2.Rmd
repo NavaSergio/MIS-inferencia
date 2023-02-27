@@ -39,6 +39,20 @@ stby(TitanicT, TitanicT$Sex, dfSummary,  max.distinct.values = 5, plain.ascii = 
 
 
 1. ¿La varianza de las edades de quienes sobrevivieron es diferente para ambos grupos?
+
+```{r}
+
+var.test(Age ~ Survived, data = TitanicT,alternative ="two.sided",ratio =1)
+```
+
+```{r}
+edadvivos=TitanicT$Age[TitanicT$Survived==1]
+edadmuertos=TitanicT$Age[TitanicT$Survived==0]
+var.test(edadmuertos,edadvivos,alternative = "two.sided", ratio = 1)
+```
+
+
+
 2. Con base en la respuesta anterior, prueba si las edades promedio son iguales o diferentes para quienes sobrevivieron  o no?
 
 ```{r}
@@ -61,13 +75,13 @@ t.test(Age ~ Survived, data = TitanicT, conf.level = 0.95)
 Se dice que aproximadamente una tercera parte de la gente murió en el Titanic, estos datos respaldan esta afirmación
 
 ```{r}
-prop.test(sum(TitanicT$Survived),851,p=1/3)
+prop.test(sum(TitanicT$Survived==1),891,p=1/3)
 ```
 
 ¿Falleció la misma proporción de hombre y de mujeres?
 
 ```{r}
-prop.test(sum(TitanicT$Sex=="female"),851,p=.5)
+prop.test(sum(TitanicT$Sex=="female"),891,p=.5)
 ```
 
 
