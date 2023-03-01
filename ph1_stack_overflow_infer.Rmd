@@ -1,0 +1,234 @@
+---
+title: "Pruebas de hipótesis con Infer"
+author: "Sergio Nava"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Stack_Overflow
+
+```{r bibliotecas, echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+#library(readr)
+#library(tidyverse)
+#library(infer)
+#library(stests)
+#library(knitr)
+#library(summarytools)
+
+packages <- c("tidyverse","infer","knitr","summarytools")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
+  install.packages(setdiff(packages, rownames(installed.packages())), repos = "http://cran.rstudio.com") 
+}
+
+sapply(packages, require, character.only=TRUE)
+```
+
+## Inferencia
+
+Para esta parte trabajaremos con el conjunto de datos **Stack Overflow Developer Survey 2020** que se puede encontrar en [https://www.kaggle.com/datasets/aitzaz/stack-overflow-developer-survey-2020](Stack Overflow). 
+
+```{r , echo=FALSE}
+stack_overflow<-read_csv("stack_overflow.csv.gz",show_col_types = FALSE)
+stack_overflow <- stack_overflow %>% drop_na(Age1stCode)
+```
+
+ A este conjunto de datos para los ejercicios se eliminaron los registros que no tenían valores en la variable *Age1stCode*
+ 
+```{r, results='asis',echo=FALSE}
+#stack_overflow %>% head() %>% kable(caption = "Primeros registros de la base de datos stack_overflow")
+#stack_overflow %>% dfSummary(style='grid',  max.distinct.values = 5, plain.ascii = FALSE, graph.col = FALSE)
+```
+
+## Hipótesis acerca de la media
+
+**Una hipotésis:** La compensación anual media de la población de científicos de datos es de \$101,000.
+
+```{r mediahipotetica}
+(mean_comp_hyp <- 101000)
+```
+
+
+**La estimación puntual (muestra estadística):**
+
+A continuación se presentan cuatro formas alternativas de obtener el promedio, el primero usa *R base*, el segundo *dplyr* y los dos últimos usan la biblioteca *infer*.
+
+```{r xbar, echo=TRUE, warning=FALSE, error=FALSE,message=FALSE}
+x_bar <- mean(stack_overflow$ConvertedComp,na.rm = TRUE)
+
+x_bar <- stack_overflow %>% 
+  summarise(mean_compensation= mean(ConvertedComp,na.rm = TRUE)) %>% 
+  pull(mean_compensation)
+
+x_bar <- stack_overflow %>% 
+  specify(response = ConvertedComp) %>%
+  calculate(stat = "mean") %>%
+  pull(stat)
+
+x_bar <- stack_overflow %>% 
+  observe(response = ConvertedComp, stat = "mean") %>% 
+  pull(stat)
+
+x_bar
+```
+
+## Distribución nula
+
+```{r distnula, echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+set.seed(123)
+null_dist <- stack_overflow %>%
+  specify(response = ConvertedComp) %>%
+  hypothesize(null = "point", mu = mean_comp_hyp) %>%
+  generate(reps = 1000) %>%
+  calculate(stat = "mean")
+visualize(null_dist) +
+  shade_p_value(obs_stat = x_bar, direction = "two-sided")
+
+```
+
+## Error estándar
+
+```{r se}
+(std_error <- stack_overflow %>% 
+  select(ConvertedComp) %>%
+  filter(!is.na(ConvertedComp)) %>%
+  summarise(se = sd(ConvertedComp)/sqrt(n())) %>%
+   pull(se))
+```
+
+## Z-scores / t-score
+
+$$valor \: estandarizado = \frac{valor - media}{desviación \: estándar}$$ $$z=\frac{estadística \: muestral - valor\: hipotético\: del\: parámetro}{error \: estándar}$$
+
+```{r}
+x_bar
+mean_comp_hyp
+std_error
+(z_score <- (x_bar - mean_comp_hyp)/std_error)
+```
+
+$$z=\frac{ `r format(round(x_bar, 2), nsmall=2, big.mark=",") ` -  `r format(round(mean_comp_hyp, 2), nsmall=2, big.mark=",")`}{`r format(round(std_error,2), nsmall=2, big.mark=",") `}=`r round(z_score,3)`$$
+
+## Prueba de hipótesis
+
+¿Es `r round(z_score,3)` un número bajo o alto?
+
+
+```{r t, echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+t_bar <- stack_overflow %>%
+   observe(response = ConvertedComp, 
+           null = "point", 
+           mu = mean_comp_hyp, 
+           stat = "t") %>%
+   pull(stat)
+```
+
+usando la distribución nula usando métodos teóricos usando *assume()*
+
+```{r t2, echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+null_dist_theory <- stack_overflow %>%
+  specify(response = ConvertedComp)  %>%
+  assume("t")
+visualize(null_dist_theory) +
+  shade_p_value(obs_stat = t_bar, direction = "two-sided")
+set.seed(123)
+null_dist <- stack_overflow %>%
+  specify(response = ConvertedComp) %>%
+  hypothesize(null = "point", mu = mean_comp_hyp) %>%
+  generate(reps = 1000) %>%
+  calculate(stat = "t")
+visualize(null_dist, method = "both") +
+  shade_p_value(obs_stat = t_bar, direction = "two-sided")
+```
+
+## Usando *t_test()*
+
+```{r ttest, echo=TRUE, warning=FALSE, error=FALSE,message=FALSE}
+stack_overflow %>%
+  t_test(response = ConvertedComp , mu = mean_comp_hyp)
+```
+
+## Proporciones
+
+
+```{r}
+stack_overflow <- stack_overflow %>% 
+  mutate(age_first_code_cut = as.factor(ifelse(Age1stCode>= 14,
+                                     "adult","child")))
+stack_overflow %>% select(age_first_code_cut) %>% table() 
+#%>%  prop.table()
+```
+
+`age_first_code_cut` clasifica cuándo el usuario de Stack Overflow comenzó a programar por primera vez.
+
+1\.
+"adult" significa que comenzaron a los 14 años o más.
+
+2\.
+"child" significa que comenzaron antes de los 14 años.
+
+Investigaciones anteriores sugieren que el 35% de los desarrolladores de software comenzaron a programar desde niños.
+
+**¿Nuestra muestra proporciona evidencia de que los científicos de datos tienen una mayor proporción que comienzan a programar desde que eran niños?**
+
+## Para nuestro problema
+
+-   Ho: La proporción de científicos de datos que comenzaron a programar cuando eran niños es de .35.
+
+-   Ha: La proporción de científicos de datos que comienzan a programar cuando son niños **no** es de .35.
+
+## Calculando un z-score
+
+```{r}
+(prop_child_samp <- stack_overflow %>% 
+  summarize(point_estimate = mean(age_first_code_cut == "child",na.rm = TRUE)) %>% 
+  pull(point_estimate))
+(n_prop<- sum(!is.na(stack_overflow$age_first_code_cut)))
+(prop_child_hyp <- 0.35)
+(std_error <- sqrt(prop_child_hyp*(1-prop_child_hyp)/n_prop))
+(z_score <- (prop_child_samp - prop_child_hyp)/std_error)
+```
+
+
+```{r grafpropo,  echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+p_hat <- stack_overflow %>%
+  specify(response = age_first_code_cut, success = "child") %>%
+  calculate(stat = "prop") %>% pull(stat)
+set.seed(123)
+null_dist <- stack_overflow %>%
+  specify(response = age_first_code_cut, success = "child") %>%
+  hypothesize(null = "point", p = prop_child_hyp) %>%
+  generate(reps = 1000) %>%
+  calculate(stat = "prop")
+visualize(null_dist) +
+  shade_p_value(obs_stat = p_hat, direction = "two-sided")
+```
+
+
+```{r  grafprop2,  echo=FALSE, warning=FALSE, error=FALSE,message=FALSE}
+p_hat <- stack_overflow %>%
+  observe(response = age_first_code_cut, success = "child", null = "point", p = prop_child_hyp, stat = "z")
+set.seed(123)
+null_dist <- stack_overflow %>%
+  specify(response = age_first_code_cut, success = "child") %>%
+  hypothesize(null = "point", p = prop_child_hyp) %>%
+  generate(reps = 1000, type = "draw") %>%
+  calculate(stat = "z")
+visualize(null_dist, method = "theoretical") +
+  shade_p_value(obs_stat = p_hat, direction = "two-sided")
+```
+
+
+```{r}
+stack_overflow %>%
+  prop_test(age_first_code_cut ~ NULL, 
+            success = "child",
+            p = prop_child_hyp,
+            z=TRUE)
+```
+
