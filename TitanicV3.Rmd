@@ -65,15 +65,19 @@ Se dice que aproximadamente una tercera parte de la gente sobrevivió en el Tita
 
 ```{r}
 prop.test(sum(TitanicT$Survived),891,p=1/3)
-TitanicT %>% mutate(Survived=as.factor(Survived)) %>% prop_test(Survived ~ NULL,p=1/3)
+TitanicT %>% 
+  mutate(Survived=as.factor(Survived)) %>% 
+  prop_test(Survived ~ NULL,p=1/3)
 ```
 
 ¿Sobrevivió la misma proporción de hombres y de mujeres o se aplicó lo de "mujeres y niños primero"?
 
 ```{r}
 prop.test(sum(TitanicT$Sex=="female"),891,p=.5)
-TitanicT %>%  prop_test(Sex ~ NULL,p=.5, order = c("female","male"))
-TitanicT %>%  prop_test(Sex ~ NULL,p=.5, success =  "male", z=TRUE)
+TitanicT %>%  
+  prop_test(Sex ~ NULL,p=.5, order = c("female","male"))
+TitanicT %>%  
+  prop_test(Sex ~ NULL,p=.5, success =  "male", z=TRUE)
 ```
 
 
@@ -128,7 +132,9 @@ TitanicT %>%
 ```
 
 ```{r}
-TitanicT %>% group_by(Pclass) %>%  summarise(meanAge = mean(Age,na.rm = T))
+TitanicT %>% 
+  group_by(Pclass) %>%  
+  summarise(meanAge = mean(Age,na.rm = T))
 mdl_Age_Pclass <- lm(Age ~ Pclass, data = TitanicT)  # variable_num ~ variable_cat
 anova(mdl_Age_Pclass)
 ```
