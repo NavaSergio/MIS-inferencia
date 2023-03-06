@@ -41,8 +41,8 @@ stack_overflow <- stack_overflow %>% drop_na(Age1stCode)
  A este conjunto de datos para los ejercicios se eliminaron los registros que no tenían valores en la variable *Age1stCode*
  
 ```{r, results='asis',echo=FALSE}
-#stack_overflow %>% head() %>% kable(caption = "Primeros registros de la base de datos stack_overflow")
-#stack_overflow %>% dfSummary(style='grid',  max.distinct.values = 5, plain.ascii = FALSE, graph.col = FALSE)
+stack_overflow %>% head() %>% kable(caption = "Primeros registros de la base de datos stack_overflow")
+stack_overflow %>% dfSummary(style='grid',  max.distinct.values = 5, plain.ascii = FALSE, graph.col = FALSE)
 ```
 
 ## Hipótesis acerca de la media

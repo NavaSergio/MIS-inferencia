@@ -67,7 +67,10 @@ Se dice que aproximadamente una tercera parte de la gente sobrevivió en el Tita
 prop.test(sum(TitanicT$Survived),891,p=1/3)
 TitanicT %>% 
   mutate(Survived=as.factor(Survived)) %>% 
-  prop_test(Survived ~ NULL,p=1/3)
+  prop_test(Survived ~ NULL,p=1/3,success ="1")
+TitanicT %>% 
+  mutate(Survived=as.factor(Survived)) %>% 
+  prop_test(Survived ~ NULL,p=1/3,success ="1",z=TRUE)
 ```
 
 ¿Sobrevivió la misma proporción de hombres y de mujeres o se aplicó lo de "mujeres y niños primero"?
