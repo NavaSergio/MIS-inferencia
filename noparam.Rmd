@@ -1,0 +1,85 @@
+---
+title: "noparam"
+output: html_document
+date: "2023-03-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Supongamos que tenemos dos muestras independientes, y queremos comprobar si hay una diferencia significativa entre ellas. Los datos son los siguientes:
+
+```{r}
+muestra1 <- c(3, 5, 1, 4, 6, 2, 7, 9)
+muestra2 <- c(2, 3, 4, 4, 6, 5, 8, 9)
+
+```
+
+El primer paso es ordenar los datos y calcular la diferencia entre cada pareja de valores. En R, podemos hacerlo de la siguiente manera:
+
+```{r}
+diferencias <- muestra1 - muestra2
+diferencias
+```
+
+
+Esto nos dará como resultado un vector con las diferencias de cada pareja de valores. El segundo paso es contar el número de diferencias positivas y negativas. En R, podemos hacerlo de la siguiente manera:
+
+```{r}
+n_positivas <- sum(diferencias > 0)
+n_negativas <- sum(diferencias < 0)
+
+```
+
+Esto nos dará como resultado el número de diferencias positivas y negativas:
+
+```{r}
+n_positivas
+n_negativas
+
+```
+
+El tercer paso es aplicar la prueba de los signos utilizando la función binom.test() de R. Si el nivel de significación es del 5%, podemos hacerlo de la siguiente manera:
+
+```{r}
+binom.test(n_negativas, n_positivas + n_negativas, p = 0.5, alternative = "two.sided", conf.level = 0.95)
+
+```
+
+
+```{r}
+dbinom(0:5,5,prob=0.5)
+```
+
+
+# Wilcoxon Signed-Rank Test
+
+## Una Muestra
+
+Supongamos que tenemos una muestra de datos y queremos comprobar si la media de la muestra es significativamente diferente de un valor de referencia. Los datos son los siguientes:
+
+```{r}
+muestra <- c(4, 2, 6, 3, 5, 8, 1, 7)
+valor_referencia <- 5
+
+```
+
+El primer paso es calcular las diferencias entre los datos de la muestra y el valor de referencia. En R, podemos hacerlo de la siguiente manera:
+
+```{r}
+diferencias <- muestra - valor_referencia
+diferencias
+
+```
+
+Esto nos da como resultado un vector con las diferencias de cada valor de la muestra con respecto al valor de referencia.
+
+El segundo paso es aplicar la prueba de Wilcoxon Signed-Rank Test utilizando la función **wilcox.test()** de R. Si el nivel de significación es del 5%, podemos hacerlo de la siguiente manera:
+
+```{r}
+wilcox.test(diferencias, mu = 0, alternative = "two.sided", conf.level = 0.95)
+
+```
+
