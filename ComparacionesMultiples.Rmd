@@ -1,0 +1,304 @@
+---
+title: "Comparaciones múltiples"
+author: "Sergio Nava"
+date: "2023-03-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Comparaciones Múltiples
+
+## Uso de comparaciones múltiples para evaluar las diferencias en las medias de grupo
+
+La comparación de las medias mediante múltiples pruebas permite analizar cuáles medias son distintas y cuantificar el nivel de diferencia. Puede determinar la relevancia estadística de estas diferencias mediante un conjunto de intervalos de confianza, pruebas de hipótesis o ambas herramientas. Además de la relevancia estadística, los intervalos de confianza le permiten evaluar la relevancia práctica de las diferencias entre medias. Como es habitual, si el intervalo de confianza no contiene el valor cero, se rechaza la hipótesis nula que sostiene que no hay diferencia entre las medias.
+
+El método de comparaciones múltiples es una técnica estadística que se utiliza para comparar varias poblaciones o grupos en un estudio y detectar diferencias significativas entre ellos.
+
+El método de comparaciones múltiples es útil cuando se realizan múltiples pruebas de hipótesis y se desea controlar la tasa de error global (es decir, la probabilidad de cometer al menos un error de tipo I). Si se realiza una sola prueba, la probabilidad de cometer un error de tipo I (rechazar incorrectamente la hipótesis nula) se puede controlar utilizando un nivel de significancia fijo. Sin embargo, cuando se realizan múltiples pruebas, la probabilidad de cometer al menos un error de tipo I aumenta a medida que se realizan más pruebas.
+
+Existen diferentes métodos de comparaciones múltiples, pero algunos de los más comunes son:
+
+- Corrección de Bonferroni: Este método ajusta el nivel de significancia para controlar la tasa de error global, dividiendo el nivel de significancia por el número de pruebas realizadas. Por ejemplo, si se realizan 5 pruebas con un nivel de significancia de 0.05, el nivel de significancia ajustado sería 0.05/5 = 0.01. $$\alpha_{corregido} = \frac{\alpha}{numero \ de \ grupos}$$
+
+- Corrección de Holm: Este método es una mejora del método de Bonferroni, que es más poderoso y menos conservador. Primero, ordena los p-valores de menor a mayor. Luego, multiplica el p-valor más pequeño por el número total de pruebas (m) y lo compara con el nivel de significancia. Si el p-valor es menor o igual que el nivel de significancia, se rechaza la hipótesis nula. Si no, se pasa al siguiente p-valor y se multiplica por m-1, y así sucesivamente hasta que se encuentra un p-valor que no cumple con el criterio de rechazo.
+
+- FDR (tasa de descubrimiento falso): Este método ajusta los p-valores para controlar la tasa de descubrimiento falso, que es la proporción de hipótesis nulas rechazadas que son verdaderas. El método FDR permite detectar más diferencias significativas que los métodos de Bonferroni y Holm, pero a costa de una mayor tasa de falsos positivos.
+
+En resumen, el método de comparaciones múltiples es una técnica importante para controlar la tasa de error global en estudios con múltiples pruebas de hipótesis y puede ayudar a identificar diferencias significativas entre múltiples poblaciones o grupos.
+
+
+### Bonferroni
+
+Para calcular el valor p ajustado por Bonferroni, se debe seguir los siguientes pasos:
+
+1. Realizar las pruebas estadísticas que se deseen y obtener el valor p para cada una de ellas.
+
+2. Multiplicar cada valor p obtenido por el número total de pruebas realizadas.
+
+3. Comparar cada valor p ajustado con el nivel de significancia deseado (por ejemplo, 0,05) y considerar los resultados significativos solo si el valor p ajustado es menor o igual que el nivel de significancia.
+
+4. Reportar los resultados significativos junto con su valor p ajustado por Bonferroni.
+
+A modo de ejemplo, supongamos que se realizan 3 pruebas y se obtienen los siguientes valores p: 0.02, 0.04 y 0.01. El número total de pruebas es 3, por lo que se multiplica cada valor p por 3, obteniendo 0.06, 0.12 y 0.03, respectivamente. Si se desea un nivel de significancia de 0.05, se consideran significativos solo los resultados con valores p ajustados iguales o menores a 0.05. En este caso, el único resultado significativo sería el tercer valor p ajustado, que es 0,03.
+
+
+### Holm
+
+El método de Holm también se utiliza para controlar el número de errores tipo I en comparaciones múltiples de hipótesis. A continuación, se presentan los pasos para calcular el umbral de significancia utilizando el método de Holm:
+
+1. Ordenar los valores de p (valor de probabilidad) para cada hipótesis nula de menor a mayor.
+2. Para cada valor de p en la lista ordenada, multiplicar el valor de p por el número de hipótesis restantes en la lista (después de esa hipótesis).
+3. Ordenar los valores obtenidos en el paso 2 de mayor a menor.
+4. Establecer un umbral de significancia como el valor más pequeño de p en la lista original para el cual el valor de p multiplicado por el número de hipótesis restantes en la lista es menor que el número de hipótesis.
+
+La idea detrás de la corrección de Holm es fingir que estás haciendo las pruebas secuencialmente; comenzando con el valor p más pequeño (en bruto) y pasando al más grande. Para el j-ésimo mayor de los valores p, el ajuste es
+
+$$p^{\prime}_j = \max \{j\times p_j, p^{\prime}_{j+1}\}$$ donde $j=n-i+1$ y $i$ es el ranking de $p_i$. 
+
+Primero, ordena todos sus valores p en orden, de menor a mayor. Para el valor p más pequeño, todo lo que tiene que hacer es multiplicarlo por m y listo. Sin embargo, para todos los demás es un proceso de dos etapas. Por ejemplo, cuando pasa al segundo valor p más pequeño, primero lo multiplica por m−1. Si esto produce un número que es mayor que el valor p ajustado que obtuvo la última vez, entonces lo conserva. Pero si es más pequeño que el último, copia el último valor p. Para ilustrar cómo funciona esto, considere la siguiente tabla.
+
+|	Hipótesis	|	Valor de p	|
+|	:---	|	:---	|
+|	H1	|	0.03	|
+|	H2	|	0.02	|
+|	H3	|	0.05	|
+|	H4	|	0.01	|
+|	H5	|	0.07	|
+
+Ahora observe la siguiente tabla que muestra los cálculos de la corrección de Holm:
+
+|	Hipótesis	|	Valor de p	|	rank j	|	p*j	|	p-ajustado	|
+|	:---	|	:---	|	:---	|	:---	|	:---	|
+|	H4	|	0.01	|	5	|	0.05	|	0.05	|
+|	H2	|	0.02	|	4	|	0.08	|	0.08	|
+|	H1	|	0.03	|	3	|	0.09	|	0.09	|
+|	H3	|	0.05	|	2	|	0.1	|	0.1	|
+|	H5	|	0.07	|	1	|	0.07	|	0.1	|
+
+En este ejemplo, la única prueba que resulta significativa es H4 pues su p-ajustado resulta ser menor o igual a 0.05.
+
+
+### FDR
+El ajuste del valor p por tasa de descubrimiento falso (FDR, por sus siglas en inglés) es un método de corrección para controlar la tasa de error tipo I en pruebas múltiples, sin ser tan conservador como el método de Bonferroni. El FDR se refiere a la proporción de resultados significativos que se espera que sean falsos positivos.
+
+Para calcular el valor p ajustado por FDR, se deben seguir los siguientes pasos:
+
+Realizar las pruebas estadísticas que se deseen y obtener el valor p para cada una de ellas.
+
+Ordenar los valores p obtenidos de menor a mayor.
+
+Calcular la tasa de descubrimiento falso (FDR) para cada valor p, utilizando la siguiente fórmula:
+
+$$FDR(p) = (p \times m)/k$$ 
+
+Donde $p$ es el p-valor para una muestra determinada, $m$ es el número total de pruebas y $k$ es el rango de la prueba (es decir, la posición en el orden de los valores p).
+
+4. Establecer un umbral de FDR deseado (por ejemplo, 0.05) y encontrar el valor p correspondiente a ese umbral de FDR.
+
+5. Todos los valores p por debajo del umbral de FDR deseado se consideran significativos.
+
+
+A modo de ejemplo, supongamos que se realizan 5 pruebas y se obtienen los siguientes valores p: [0.03, 0.02, 0.05, 0.01, 0.07]
+
+1. Se obtienen los valores p: 0.03, 0.02, 0.05, 0.01, 0.07.
+
+2. Se ordenan de menor a mayor: 0.01, 0.02, 0.03, 0.05, 0.07.
+
+3. Se calcula la tasa de descubrimiento falso para cada valor p, utilizando la fórmula FDR(p) = (p * m) / k, donde m es el número total de pruebas y k es el rango de la prueba:
+
+FDR(0.01) = (0.01 * 5) / 1 = 0.05
+
+FDR(0.02) = (0.02 * 5) / 2 = 0.05
+
+FDR(0.03) = (0.03 * 5) / 3 = 0.05
+
+FDR(0.05) = (0.05 * 5) / 4 = 0.0625
+
+FDR(0.07) = (0.07 * 5) / 5 = 0.07
+
+|	Hipótesis	|	Valor de p	|	rango k	|	FDR	|
+|	:---	|	:---	|	:---	|	:---	|
+|	H4	|	0.01	|	1	|	0.05	|
+|	H2	|	0.02	|	2	|	0.05	|
+|	H1	|	0.03	|	3	|	0.05	|
+|	H3	|	0.05	|	4	|	0.0625	|
+|	H5	|	0.07	|	5	|	0.07	|
+
+4. Se establece el umbral de FDR deseado. Por ejemplo, si se desea un umbral de 0.05, se selecciona el último valor p con una tasa de descubrimiento falso menor o igual a 0.05. En este caso, ese valor es 0.03.
+
+5. Los valores p correspondientes a las pruebas con una tasa de descubrimiento falso menor o igual al umbral seleccionado se consideran significativos. En este caso, los valores p correspondientes a las pruebas H4, H2 y H1 son significativos, ya que tienen una tasa de descubrimiento falso menor o igual a 0.05. Los valores p correspondientes a las pruebas H3 y H5 no son significativos, ya que su tasa de descubrimiento falso es mayor a 0.05.
+
+Es importante tener en cuenta que el método FDR no garantiza el control de errores tipo I a nivel individual para cada hipótesis nula, sino que controla el número esperado de falsos descubrimientos en el conjunto de hipótesis nulas rechazadas.
+
+## Ejemplo en R `PlantGrowth` 
+
+El conjunto de datos `PlantGrowth` contiene los resultados de un experimento donde se midió el crecimiento de plantas en tres grupos distintos que fueron tratados con diferentes niveles de nutrientes. Cada grupo tiene 10 observaciones.
+
+Primero, cargamos el conjunto de datos y lo visualizamos:
+
+```{r}
+data(PlantGrowth)  # Carga el conjunto de datos PlantGrowth
+head(PlantGrowth)  # Muestra las primeras filas del conjunto de datos
+```
+
+El grupo "ctrl" representa el grupo de control, mientras que los grupos "trt1" y "trt2" representan los grupos de tratamiento 1 y 2, respectivamente.
+
+Para comparar las medias de los tres grupos, podemos usar un análisis de varianza (ANOVA). El código para realizar el ANOVA y ver los resultados es el siguiente:
+
+```{r}
+modelo <- lm(weight ~ group, data = PlantGrowth)  # Crea un modelo lineal
+anova_resultados <- anova(modelo)  # Realiza el ANOVA
+print(anova_resultados)  # Imprime los resultados
+```
+
+La tabla de resultados nos muestra que la variable group tiene un efecto significativo en el peso de las plantas (p < 0.05).
+
+Para identificar cuáles grupos son significativamente diferentes entre sí, podemos realizar comparaciones múltiples. Usaremos la función `pairwise.t.test()` primero sin ajustar los p-valores y después ajustaremos los p-valores para controlar la tasa de error global  (Bonferroni y Holm-Bonferroni) .
+
+```{r}
+comparaciones.none <- pairwise.t.test(PlantGrowth$weight, 
+                                      PlantGrowth$group, 
+                                      p.adjust.method = "none")
+print(comparaciones.none)
+```
+
+```{r}
+comparaciones.B <- pairwise.t.test(PlantGrowth$weight, 
+                                      PlantGrowth$group, 
+                                      p.adjust.method = "bonferroni")
+print(comparaciones.B)
+```
+
+
+```{r}
+comparaciones.holm <- pairwise.t.test(PlantGrowth$weight, 
+                                      PlantGrowth$group, 
+                                      p.adjust.method = "holm")
+print(comparaciones.holm)
+```
+
+
+```{r}
+comparaciones.fdr <- pairwise.t.test(PlantGrowth$weight, 
+                                      PlantGrowth$group, 
+                                      p.adjust.method = "fdr")
+print(comparaciones.fdr)
+```
+
+## Ejemplo en R `ChickWeight` 
+
+
+En este ejemplo, utilizaremos el conjunto de datos `ChickWeight` de R, que contiene información sobre el peso de los pollos durante un experimento nutricional. Vamos a comparar las medias de peso de los pollos entre cuatro dietas diferentes (1, 2, 3 y 4) y aplicar el método de comparaciones múltiples para identificar si hay diferencias significativas entre las dietas.
+
+Primero, cargamos los datos y creamos un dataframe con los cuatro grupos:
+
+```{r}
+data(ChickWeight)  # Carga los datos de ChickWeight
+datos <- ChickWeight  # Crea un dataframe con los datos
+#grupos <- split(datos$weight, datos$Diet)  
+# Divide los datos en cuatro grupos según la dieta
+```
+
+```{r}
+anova_resultados <- aov(weight ~ Diet, data = datos)  # Realiza el ANOVA
+summary(anova_resultados)  # Imprime los resultados del ANOVA
+
+```
+
+Después, podemos usar el método de comparaciones múltiples para identificar cuáles grupos son significativamente diferentes entre sí. Para ello, utilizamos la función `pairwise.t.test()`:
+
+```{r}
+comparaciones.none <- pairwise.t.test(datos$weight, 
+                                 datos$Diet, 
+                                 p.adjust.method = "none")  
+# Realiza las comparaciones sin hacer ajuste
+comparaciones.none
+
+```
+
+
+```{r}
+comparaciones.B <- pairwise.t.test(datos$weight, 
+                                 datos$Diet, 
+                                 p.adjust.method = "bonferroni")  
+# Realiza las comparaciones ajustando el p-valor con el método de Bonferroni
+comparaciones.B
+
+```
+
+
+```{r}
+comparaciones.holm <- pairwise.t.test(datos$weight, datos$Diet, p.adjust.method = "holm")  # Realiza las comparaciones ajustando el p-valor con el método de Holm-Bonferroni
+comparaciones.holm
+
+```
+
+
+```{r}
+comparaciones.fdr <- pairwise.t.test(datos$weight, datos$Diet, p.adjust.method = "fdr")  
+# Realiza las comparaciones ajustando el p-valor con el método de FDR
+comparaciones.fdr
+
+```
+
+El resultado nos mostrará los p-valores ajustados para todas las comparaciones posibles entre los grupos. En este caso, estamos usando el método de Bonferroni y holm para ajustar los p-valores y controlar la tasa de error global.
+
+
+## Comparación
+
+Supongamos que tenemos un conjunto de datos con 10 variables independientes y queremos realizar comparaciones múltiples para determinar cuáles de ellas tienen una media significativamente diferente de cero.
+
+Primero, realizamos un análisis de t-tests para cada variable:
+
+```{r}
+set.seed(1231)
+datos <- data.frame(matrix(rnorm(1000), nrow = 100, ncol = 10))  # Crea un conjunto de datos con 10 variables independientes
+pvalores <- apply(datos, 2, function(x) t.test(x, mu = 0)$p.value)  # Realiza un t-test para cada variable independiente
+pvalores
+```
+
+
+A continuación, podemos utilizar diferentes métodos de comparaciones múltiples para ajustar los p-valores y controlar la tasa de error global:
+
+### Método de Bonferroni
+
+El método de Bonferroni es uno de los métodos más conservadores y ajusta los p-valores multiplicándolos por el número de comparaciones realizadas. Por ejemplo, si realizamos 10 comparaciones, un p-valor de 0.05/10 = 0.005 será considerado significativo. 
+
+```{r}
+ajuste_bonferroni <- p.adjust(pvalores, method = "bonferroni")  # Ajusta los p-valores con el método de Bonferroni
+
+```
+
+### Método de Holm
+
+El método de Holm es un método secuencial que ordena los p-valores de menor a mayor y aplica ajustes secuenciales a medida que se recorren los p-valores en orden ascendente. Con este método, el valor de significancia $\alpha$ se corrige secuencialmente haciéndolo menos conservador que el de Bonferroni. Aun así, parece que tampoco es indicado si se realizan más de 6 comparaciones.
+
+```{r}
+ajuste_holm <- p.adjust(pvalores, method = "holm")  # Ajusta los p-valores con el método de Holm
+
+```
+
+### Método de FDR
+
+El método de FDR (False Discovery Rate) ajusta los p-valores utilizando una corrección basada en el porcentaje esperado de falsos descubrimientos. Este método es menos conservador que Bonferroni y Holm y puede ser más apropiado cuando se espera que un número significativo de las variables estudiadas tenga una diferencia significativa de cero.
+
+```{r}
+ajuste_fdr <- p.adjust(pvalores, method = "fdr")  # Ajusta los p-valores con el método de FDR
+
+```
+
+Podemos comparar los resultados de los tres métodos visualizando los p-valores originales junto con los p-valores ajustados:
+
+```{r}
+par(mfrow = c(2, 2))
+plot(pvalores, ylim = c(0, 1), main = "P-valores originales")
+plot(ajuste_bonferroni, ylim = c(0, 1), main = "Ajuste de Bonferroni")
+plot(ajuste_holm, ylim = c(0, 1), main = "Ajuste de Holm")
+plot(ajuste_fdr, ylim = c(0, 1), main = "Ajuste de FDR")
+par(mfrow = c(1, 1))
+```
+
+En el gráfico, podemos ver que el método de Bonferroni ajusta los p-valores de manera más conservadora, mientras que el método de FDR es el menos conservador. 
