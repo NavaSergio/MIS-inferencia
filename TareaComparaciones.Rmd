@@ -1,0 +1,32 @@
+---
+title: "Tarea comparaciones"
+output: pdf_document
+date: "2023-03-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(kableExtra)
+```
+
+## Tarea
+
+Con base en la siguiente tabla, utilice los conjuntos de datos precargados indicados en la columna **Conjunto de datos**, y haga un análisis para comparar la media de la **Variable dependiente** como función de la **Variable independiente**. Verifique si la media de alguno de los **Grupos** es diferente y en caso que lo sea, realice las comparaciones múltiples pertinentes.
+
+Recuerde que la elección de las pruebas depende del resultado de pruebas previas y/o de la validación de supuestos. Para cada ejercicio indique la razón de la toma de decisiones realizada. Al final de cada análisis, incluya un párrafo de *Conclusión o interpretación de resultados* en lenguaje propio para su jefe o cliente, en el contexto del **conjunto de datos**. 
+
+
+| Ejercicio | Conjunto de datos | Variable dependiente | Variable independiente | Grupos |
+| --- | --- | --- | --- | --- |
+| 1 | PlantGrowth | weight | group | control, trt1, trt2 |
+| 2 | InsectSprays | count | spray | A, B, C, D, E, F |
+| 3 | ToothGrowth | len | supp | OJ, VC |
+| 4 | CO2 | uptake | Type | Quebec, Mississippi |
+| 5 | iris | Sepal.Length | Species | setosa, versicolor, virginica |
+| 6 | ChickWeight | weight | Diet | 1, 2, 3, 4 |
+| 7 | esoph | alcgp | agegp | 25-34, 35-44, 45-54, 55-64, 65-74, 75+ |
+| 8 | PlantGrowth | weight | group | control, trt1, trt2 |
+| 9 | mtcars | mpg | vs | 0, 1 |
+| 10 | CO2 | uptake | conc | 95, 175, 250, 350, 500, 675 |
+
+El entregable es un reporte realizado en `Rmarkdown` con la salida corresondiente (PDF, HTML o DOCX) con lo que se ha indicado.
