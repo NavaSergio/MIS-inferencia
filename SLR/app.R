@@ -10,7 +10,19 @@ simula_datos <- function(n, b0, b1, varianza){
   # Devolver lista con resultados
   return(list(x = x, y = y, modelo = modelo))
 }
-
+ggplotRegression <- function (fit) {
+  
+  require(ggplot2)
+  
+  ggplot(fit$model, aes_string(x = names(fit$model)[2], y = names(fit$model)[1])) + 
+    geom_point() +
+    stat_smooth(method = "lm", col = "red") +
+    labs(title = paste("Adj R2 = ",signif(summary(fit)$adj.r.squared, 5),
+                       "Intercept =",signif(fit$coef[[1]],5 ),
+                       " Slope =",signif(fit$coef[[2]], 5),
+                       " P =",signif(summary(fit)$coef[2,4], 5)))+
+    theme_classic()
+}
 
 ui <- fluidPage(
   titlePanel("Regresión lineal simple"),
@@ -21,7 +33,7 @@ ui <- fluidPage(
       numericInput("b1", "Pendiente", value = 1, min = -10, max = 10),
       numericInput("varianza", "Varianza", value = 1, min = 1, max = 30, step = 1),
       selectInput("funcion", "Selecciona una función:",
-                  choices = c("X^2", "ln(X)", "exp(X)", "X", "sin(X)"))
+                  choices = c("X", "ln(X)", "exp(X)", "X^2", "sin(X)"))
     ),
     mainPanel(
       plotOutput("dispersion"),
@@ -64,8 +76,9 @@ server <- function(input, output){
   # Mostrar diagrama de dispersión con la línea ajustada
   output$dispersion <- renderPlot({
     datos <- datos()
-    plot(datos$x, datos$y, main = "Diagrama de dispersión")
-    abline(datos$modelo, col = "red")
+    #plot(datos$x, datos$y, main = "Diagrama de dispersión")
+    #abline(datos$modelo, col = "red")
+    ggplotRegression(datos$modelo)
   })
   output$diag <- renderPlot({
     datos <- datos()
@@ -79,20 +92,13 @@ server <- function(input, output){
   output$anova <- renderTable({
     datos <- datos()
     d <- anova(datos$modelo)
-    names <- rownames(d)
-    rownames(d) <- NULL
-    data <- cbind(names,d)
-    data
-  })
+    d
+  },digits=3,rownames = TRUE,na = "")
   output$summary <- renderTable({
     datos <- datos()
     d <- summary(datos$modelo)$coefficients
-    names <- rownames(d)
-    rownames(d) <- NULL
-    data <- cbind(names,d)
-    data
-    
-  })
+    d
+  },digits=3,rownames = TRUE)
   
 }
 
