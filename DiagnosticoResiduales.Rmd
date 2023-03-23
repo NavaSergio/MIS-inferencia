@@ -111,7 +111,7 @@ par(mfrow=c(1,1))
 
 ---
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 plot(datos4)
 abline(modelo4)
 ```
