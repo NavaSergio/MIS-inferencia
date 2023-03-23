@@ -33,7 +33,8 @@ ui <- fluidPage(
       numericInput("b1", "Pendiente", value = 1, min = -10, max = 10),
       numericInput("varianza", "Varianza", value = 1, min = 1, max = 30, step = 1),
       selectInput("funcion", "Selecciona una función:",
-                  choices = c("X", "ln(X)", "exp(X)", "X^2", "sin(X)"))
+                  choices = c("X", "ln(X)", "exp(X)", "X^2", "sin(X)")),
+      downloadButton('downloadData', 'Descargar archivo .CSV')
     ),
     mainPanel(
       plotOutput("dispersion"),
@@ -56,15 +57,15 @@ server <- function(input, output){
     varianza <- input$varianza
     x <- runif(n, min = 1.1, max = 10) # Generar valores aleatorios para X
     if (input$funcion == "X^2") {
-      y <- (b0 + b1*x + rnorm(n, mean = 0, sd = varianza))^2
+      y <- (b0 + b1*x + rnorm(n, mean = 0, sd = sqrt(varianza)))^2
     } else if (input$funcion == "ln(X)") {
-      y <- log(b0 + b1*x + rnorm(n, mean = 0, sd = varianza))
+      y <- log(b0 + b1*x + rnorm(n, mean = 0, sd = sqrt(varianza)))
     } else if (input$funcion == "exp(X)") {
-      y <- exp(b0 + b1*x + rnorm(n, mean = 0, sd = varianza))
+      y <- exp(b0 + b1*x + rnorm(n, mean = 0, sd = sqrt(varianza)))
     } else if (input$funcion == "X") {
-      y <- b0 + b1*x + rnorm(n, mean = 0, sd = varianza) # Simular Y
+      y <- b0 + b1*x + rnorm(n, mean = 0, sd = sqrt(varianza)) # Simular Y
     } else if (input$funcion == "sin(X)") {
-      y <- sin(b0 + b1*x + rnorm(n, mean = 0, sd = varianza))
+      y <- sin(b0 + b1*x + rnorm(n, mean = 0, sd = sqrt(varianza)))
     }
     
     
@@ -99,7 +100,15 @@ server <- function(input, output){
     d <- summary(datos$modelo)$coefficients
     d
   },digits=3,rownames = TRUE)
-  
+  output$downloadData <- downloadHandler(
+    filename = function() { 
+      paste('Datos', '.csv', sep='') 
+    },
+    content = function(file) {
+      misdatos <- data.frame(x=datos()$x,y=datos()$y)
+      write.csv(misdatos, file,na="",row.names = FALSE)
+    }
+  )
 }
 
 
