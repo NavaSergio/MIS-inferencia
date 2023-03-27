@@ -17,8 +17,31 @@ x <- y <- seq(0,10,by=.5)
 z <- 50 + outer(10 * x ,  7*y ,"+")
 
 fig <- plot_ly(x=x, y=y, z = z)
-fig <- fig %>% add_surface()
+fig <- fig %>% add_surface(
+    contours = list(
+    z = list(
+      show=TRUE,
+      usecolormap=TRUE,
+      highlightcolor="#ff0000",
+      project=list(z=TRUE)
+      )
+    )
+)
 fig
 
+```
+
+```{r}
+
+mtcars$am[which(mtcars$am == 0)] <- 'Automatic'
+mtcars$am[which(mtcars$am == 1)] <- 'Manual'
+mtcars$am <- as.factor(mtcars$am)
+
+fig <- plot_ly(mtcars, x = ~wt, y = ~hp, z = ~qsec, color = ~am, colors = c('#BF382A', '#0C4B8E'))
+fig <- fig %>% add_markers()
+fig <- fig %>% layout(scene = list(xaxis = list(title = 'Weight'),
+                     yaxis = list(title = 'Gross horsepower'),
+                     zaxis = list(title = '1/4 mile time')))
+fig
 ```
 
