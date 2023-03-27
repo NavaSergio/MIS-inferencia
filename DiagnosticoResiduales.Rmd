@@ -111,8 +111,16 @@ par(mfrow=c(1,1))
 
 ---
 
-```{r eval=FALSE, include=FALSE}
+
+```{r }
+par(mfrow=c(2,2))
+plot(modelo4)
+par(mfrow=c(1,1))
+```
+
+```{r }
 plot(datos4)
 abline(modelo4)
 ```
 
+https://s3rgionava.shinyapps.io/SLRsim/
