@@ -1,0 +1,24 @@
+---
+title: "grafica3d"
+author: "Sergio Nava"
+date: "2023-03-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(plotly)
+```
+
+## Grafica en 3D
+
+```{r}
+x <- y <- seq(0,10,by=.5)
+z <- 50 + outer(10 * x ,  7*y ,"+")
+
+fig <- plot_ly(x=x, y=y, z = z)
+fig <- fig %>% add_surface()
+fig
+
+```
+
