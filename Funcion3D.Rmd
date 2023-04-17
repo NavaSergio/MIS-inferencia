@@ -45,3 +45,17 @@ fig <- fig %>% layout(scene = list(xaxis = list(title = 'Weight'),
 fig
 ```
 
+
+
+
+```{r}
+Datos <- data.frame(y=c(10,17,48,27,55,26,9,16),
+                    x1=c(2,3,4,1,5,6,7,8),
+                    x2=c(1,2,5,2,6,4,3,4))
+plot(Datos)
+fig <- plot_ly(Datos, x = ~x1, y = ~x2, z = ~y)
+fig <- fig %>% add_markers()
+
+fig
+```
+
