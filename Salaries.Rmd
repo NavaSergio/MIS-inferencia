@@ -99,3 +99,12 @@ y si queremos calcular los salarios medios de las combinaciones de `sex` y `rank
 with(Salaries,table(sex,rank))
 ```
 
+```{r}
+modelo2 <- lm(salary ~ sex*rank,data = Salaries)
+summary(modelo2)
+```
+
+```{r}
+model.matrix(modelo2)
+```
+
