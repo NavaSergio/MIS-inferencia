@@ -1,0 +1,101 @@
+---
+title: "Salaries"
+author: "Sergio Nava"
+date: "2023-04-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Variables categóricas con dos niveles
+
+Usaremos el conjunto de datos de *Salaries* [*car*], que contiene el salario académico de nueve meses de 2008-09 para profesores asistentes, profesores asociados y profesores en una universidad en los EE. UU. Los datos se recopilaron como parte del esfuerzo continuo de la administración de la universidad para monitorear las diferencias salariales entre los profesores masculinos y femeninos.
+
+
+```{r}
+# Load the data
+data("Salaries", package = "carData")
+# Inspect the data
+str(Salaries)
+summary(Salaries)
+```
+
+Recuerde que la ecuación de regresión, para predecir una variable de resultado ($y$) sobre la base de una variable predictora ($x$), se puede escribir simplemente como $y = b0+b1*x$. $b0$ y $b1$ son los coeficientes beta de regresión, que representan la intersección y la pendiente, respectivamente.
+
+Supongamos que deseamos investigar las diferencias en los salarios entre hombres y mujeres. Con base en la variable de género, podemos crear una nueva variable ficticia que tome el valor: 
+- 1 si una persona es hombre (Male)
+- 0 si una persona es mujer (Female)
+
+y usar esta variable como predictor en la ecuación de regresión, lo que lleva al siguiente modelo: 
+
+- $b0 + b1$ si la persona es hombre 
+- $b0$ si la persona es mujer 
+
+Los coeficientes se pueden interpretar de la siguiente manera: 
+
+1. $b0$ es el salario promedio entre mujeres, 
+2.  $b0 + b1$ es el salario promedio entre hombres 
+3. y $b1$ es la diferencia promedio de salario entre hombres y mujeres.
+
+```{r}
+model <- lm(salary ~ sex, data = Salaries)
+summary(model)$coef
+```
+
+A partir del resultado anterior, se estima que el salario promedio de las mujeres es $101002$, mientras que los hombres se estiman en un total de $101002 +  14088 = 115090$. El valor p para la variable ficticia *sexMale* es muy significativo, lo que sugiere que existe una evidencia estadística de un diferencia en el salario promedio entre los géneros.
+
+```{r}
+contrasts(Salaries$sex)
+```
+
+Puede usar la función `relevel()` para establecer la categoría de referencia en hombres de la siguiente manera:
+
+```{r}
+Salaries <- Salaries %>%
+  mutate(sex = relevel(sex, ref = "Male"))
+contrasts(Salaries$sex)
+```
+
+```{r}
+model <- lm(salary ~ sex, data = Salaries)
+summary(model)$coef
+```
+
+El hecho de que el coeficiente de sexFemale en el resultado de la regresión sea negativo indica que ser mujer está asociado con una disminución del salario (en relación con los hombres). Ahora las estimaciones para `bo` y `b1` son $115090 $y $-14088$, respectivamente, lo que lleva una vez más a una predicción de salario promedio de $115090$ para hombres y una predicción de $115090 - 14088 = 101002$ para mujeres.
+
+## Variables categóricas con más de dos niveles
+
+Generalmente, una variable categórica con $n$ niveles se transformará en $n-1$ variables cada una con dos niveles. Estas $n-1$ nuevas variables contienen la misma información que la variable individual. Esta recodificación crea una tabla llamada matriz de contraste. 
+
+Por ejemplo, el rango en los datos de Salarios tiene tres niveles: "AsstProf", "AssocProf" y "Prof". Esta variable podría codificarse de forma ficticia en dos variables, una llamada AssocProf y otra Prof: 
+
+- Si rank = AssocProf, entonces la columna AssocProf se codificaría con un 1 y Prof con un 0. 
+- Si rank = Prof, entonces la columna AssocProf se codificaría con un 0 y Prof se codificaría con un 1. 
+- Si rank = AsstProf, entonces ambas columnas "AssocProf" y "Prof" se codificarían con un 0. 
+
+R realiza automáticamente esta codificación ficticia. Para fines de demostración, puede usar la función `model.matrix()` para crear una matriz de contraste para una variable de factor:
+
+```{r}
+res <- model.matrix(~rank, data = Salaries)
+head(res[, -1])
+head(Salaries)
+contrasts(Salaries$rank)
+```
+
+```{r}
+model <- lm(salary ~ rank, data = Salaries)
+summary(model)$coef
+```
+
+¿cómo se interpreta?
+
+
+y si queremos calcular los salarios medios de las combinaciones de `sex` y `rank`
+
+```{r}
+with(Salaries,table(sex,rank))
+```
+
