@@ -1,0 +1,624 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  10pt,
+  ignorenonframetext,
+]{beamer}
+\usepackage{pgfpages}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+% Prevent slide breaks in the middle of a paragraph
+\widowpenalties 1 10000
+\raggedbottom
+\setbeamertemplate{part page}{
+  \centering
+  \begin{beamercolorbox}[sep=16pt,center]{part title}
+    \usebeamerfont{part title}\insertpart\par
+  \end{beamercolorbox}
+}
+\setbeamertemplate{section page}{
+  \centering
+  \begin{beamercolorbox}[sep=12pt,center]{part title}
+    \usebeamerfont{section title}\insertsection\par
+  \end{beamercolorbox}
+}
+\setbeamertemplate{subsection page}{
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center]{part title}
+    \usebeamerfont{subsection title}\insertsubsection\par
+  \end{beamercolorbox}
+}
+\AtBeginPart{
+  \frame{\partpage}
+}
+\AtBeginSection{
+  \ifbibliography
+  \else
+    \frame{\sectionpage}
+  \fi
+}
+\AtBeginSubsection{
+  \frame{\subsectionpage}
+}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usetheme[]{AnnArbor}
+\usecolortheme{dolphin}
+\usefonttheme{structurebold}
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\newif\ifbibliography
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+\usepackage{caption}
+% Make caption package work with longtable
+\makeatletter
+\def\fnum@table{\tablename~\thetable}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\def\begincols{\begin{columns}}
+\def\begincol{\begin{column}}
+\def\endcol{\end{column}}
+\def\endcols{\end{columns}}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Intervalos de Confianza},
+  pdfauthor={Sergio Nava},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Intervalos de Confianza}
+\subtitle{Estimación puntual y por intervalo}
+\author{Sergio Nava}
+\date{18/4/2023}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}[allowframebreaks]
+  \tableofcontents[hideallsubsections]
+\end{frame}
+\begin{frame}{Estimadores Puntuales}
+\protect\hypertarget{estimadores-puntuales}{}
+El objetivo de la estadística inferencial consiste en hacer inferencias
+(estimaciones) acerca de los parámetros de una población teniendo en
+cuenta la información contenida en la muestra.
+
+La inferencia estadística comprende una serie de técnicas de uso
+imprescindible para tomar decisiones con respecto a la cuestión
+planteada por el investigador al comienzo de su tarea de análisis de
+datos.
+
+Es necesario destacar que, las decisiones que debe tomar el
+investigador, ante la situación de incertidumbre, así como, inferir
+sobre casos particulares a la generalidad, dichas decisiones deben de
+estar basadas en razonamientos que garanticen probabilidades pequeñas de
+equivocarse.
+\end{frame}
+
+\begin{frame}{Estimación por intervalos}
+\protect\hypertarget{estimaciuxf3n-por-intervalos}{}
+La estimación por intervalos es un procedimiento mediante el cual se
+puede afirmar, con una determinada confianza, que el intervalo \((a,b)\)
+encierra el verdadero valor del parámetro. Para realizar una estimación
+por intervalos se hace la siguiente afirmación:
+\[P(a\le \theta \le b)=1-\alpha\] El intervalo \((a,b)\) se llama
+intervalo de confianza, \(b - a\) es una medida de la amplitud de dicho
+intervalo y \(1-\alpha\) es una medida de la confianza con la que
+contamos para efectuar la estimación.
+
+Nota: \(\alpha\) por sí sola se denomina nivel de significancia.
+\end{frame}
+
+\begin{frame}{Intervalos de confianza para medias con varianza conocida}
+\protect\hypertarget{intervalos-de-confianza-para-medias-con-varianza-conocida}{}
+Hemos explicado que \(\bar{x}\) es el mejor estimador puntual de
+\(\mu\), pero nos sorprendería realmente que la media muestral fuera
+exactamente igual a \(\mu\). Resultaría más comprensible pensar que el
+valor aportado por un estimador se ubica en las cercanías del parámetro.
+
+Esta situación sugiere que puede ser más apropiado efectuar un intervalo
+alrededor de \(\bar{x}\) y establecer una cierta confianza de que
+\(\mu\) esté comprendido en dicho intervalo.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section}{}
+\textbf{Importante}
+
+\begin{itemize}
+\tightlist
+\item
+  En la estimación por intervalos de confianza de un parámetro
+  poblacional siempre hablaremos de la confianza de que el intervalo
+  contenga al parámetro.
+\item
+  El parámetro es una cantidad desconocida, pero fija.
+\end{itemize}
+
+Ya sabemos que el mejor estimador puntual de \(\mu\) es \(\bar{x}\), la
+media muestral y, en consecuencia, lo utilizaremos para la construcción
+del Intervalo de confianza. Basándonos en el teorema central del límite
+podemos establecer:
+\[\bar{X}\sim N \left( \mu,\frac{\sigma^2}{n}\right)\]
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-1}{}
+Para poder utilizar la tabla de probabilidades normales debemos
+estandarizar esta variable aleatoria.
+
+\[Z = \frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \sim N(0,1)\]
+
+Siendo \(Z\) una variable normal estandarizada, se deberán buscar dos
+valores \(z_1\) y \(z_2\) tales que \[ P(z_1 \le Z \le z_2)=1-\alpha \]
+o lo que es lo mismo
+\[ P\left(z_1 \le \frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \le z_2\right)=1-\alpha \]
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-2}{}
+Donde \(z_1 = Z_{1-\frac{\alpha}{2}}\) y \(z_2 = Z_{\frac{\alpha}{2}}\).
+Por ejemplo para \(\alpha = 0.05\)
+
+\begin{center}\includegraphics{PresentacionIC_files/figure-beamer/unnamed-chunk-1-1} \end{center}
+
+\emph{Importante} El coeficiente de confianza es la probabilidad
+(confianza) de que un Intervalo contenga al parámetro estimado.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-3}{}
+El coeficiente de confianza es un valor fijado por el investigador antes
+de comenzar la estimación. Así, si decide trabajar con una confianza del
+\(95\%\) para efectuar la estimación, el razonamiento será el siguiente:
+
+\begin{itemize}
+\tightlist
+\item
+  Sobre \(100\) muestras aleatorias de un cierto tamaño \(n\) de una
+  población, si en cada una se calcula la medía muestral \(\bar{x}\) y,
+  a partir de ellas, se construyen sus correspondientes intervalos de
+  confianza para el parámetro que se desea estimar, \(95\) contendrán al
+  verdadero valor del parámetro poblacional, mientras que \(5\) no lo
+  abarcarán.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-4}{}
+\begin{center}\includegraphics{PresentacionIC_files/figure-beamer/unnamed-chunk-2-1} \end{center}
+
+Cada punto segmento pequeño vertical representa la media muestral y cada
+línea que pasa a través de estos estos segmentos es la amplitud del
+intervalo correspondiente. En este caso vemos que, de 50 intervalos
+obtenidos a partir de las 50 muestras aleatorias 5 de tales intervalos
+(10\%) no contienen al verdadero valor del parámetro \(\mu\) y 45 (90\%)
+sí lo contienen.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-5}{}
+Entonces para \(\alpha = 0.05\) podemos escribir
+\[ P\left(-1.96 \le \frac{\bar{X}-\mu}{\frac{\sigma}{\sqrt{n}}} \le 1.96 \right)=0.95 \]
+
+Ahora bien, como estamos tratando de estimar al parámetro \(\mu\) lo
+razonable sería despejar convenientemente de modo que quede en el centro
+del intervalo el parámetros \(\mu\).
+
+\[ P\left(-1.96 \times \frac{\sigma}{\sqrt{n}} \le \bar{X}-\mu \le 1.96 \times \frac{\sigma}{\sqrt{n}} \right)=0.95 \]
+\[ P\left(-1.96 \times \frac{\sigma}{\sqrt{n}} -\bar{X} \le -\mu \le 1.96 \times \frac{\sigma}{\sqrt{n}} - \bar{X} \right)=0.95 \]
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-6}{}
+Si multiplicamos por \((-1)\) toda la desigualdad, cambia el sentido de
+la desigualdad:
+\[ P\left(1.96 \times \frac{\sigma}{\sqrt{n}} +\bar{X} \ge \mu \ge -1.96 \times \frac{\sigma}{\sqrt{n}} + \bar{X} \right)=0.95 \]
+es decir
+\[ P\left(\bar{X} +1.96 \times \frac{\sigma}{\sqrt{n}}  \ge \mu \ge \bar{X} -1.96 \times \frac{\sigma}{\sqrt{n}} \right)=0.95 \]
+reacomodando convenientemente tenemos que
+\[ P\left(\bar{X} - 1.96 \times \frac{\sigma}{\sqrt{n}}  \le \mu \le \bar{X} +1.96 \times \frac{\sigma}{\sqrt{n}} \right)=0.95 \]
+Este es el intervalo de confianza para el parámetro \(\mu\) cuando
+trabajamos con una confianza del \(95\%\).
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-7}{}
+\begin{itemize}
+\tightlist
+\item
+  En situaciones reales de investigación, la población generalmente es
+  grande y \(\sigma\) es un parámetro desconocido. Para solucionar este
+  problema, \(\sigma\) también debe ser estimado. Su estimador lógico
+  será \(s\), la desviación estándar de la muestra.
+\item
+  Si el tamaño de la muestra es suficientemente grande (muestras de
+  tamaño mayor o igual a 30), no hay problemas en seguir utilizando la
+  distribución de probabilidad Normal para medir la confianza de la
+  estimación.
+\item
+  En cambio, si la muestra es chica y no se puede aumentar su tamaño,
+  por razones de costo o de tiempo u otras, para calcular la confianza
+  de la estimación utilizaremos otra distribución de probabilidad: la
+  distribución correspondiente a la variable \emph{t de Student}, como
+  veremos más adelante.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-8}{}
+Supongamos, por ejemplo, que se quiere conocer el aumento promedio de
+peso de niños pertenecientes a un estrato social muy bajo cuando se los
+alimenta con una dieta fortificante.
+
+La población objetivo fue especificada como los niños de dicho estrato
+social en el estado de Zacatecas.
+
+Sería casi imposible alimentar con la dieta a todos los niños del
+estado. La única solución a este problema será recurrir a una muestra de
+\(n = 40\) niños seleccionados aleatoriamente de la población en
+cuestión y alimentarlos con la dieta en estudio. Al cabo de un cierto
+tiempo se registrarán los aumentos de peso de cada niño y se calculará
+el promedio en la muestra.
+
+Supongamos que resultó \(\bar{x}= 4.300\) kg.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-9}{}
+Utilizaremos esta estimación puntual para efectuar una estimación por
+intervalos del parámetro \(\mu\): aumento de peso promedio de niños
+pertenecientes al estrato social muy bajo del estado de Zacatecas.
+
+Supongamos que, por estudios previos se conoce que el valor que toma el
+parámetro varianza poblacional es \(\sigma^2=4\) \(kg^2\). Podemos
+utilizar la distribución de probabilidad normal para efectuar la
+estimación. Con una confianza de \(1-\alpha=0.95\), el intervalo
+resultante será:
+\[ P\left(4.3 - 1.96 \times \frac{2}{\sqrt{40}}  \le \mu \le 4.3 +1.96 \times \frac{2}{\sqrt{40}} \right)=0.95 \]
+\[P(3.69 \le \mu \le 4.69) = 0.95\] Y nos da una amplitud del intervalo
+\(4.96-3.68=1.24\)
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-10}{}
+Ahora bien, si en lugar de tomar una muestra de \(40\) niños hubiésemos
+tomado una de \(n = 100\) niños, manteniendo todos los demás valores
+constantes, el intervalo será:
+\[ P\left(4.3 - 1.96 \times \frac{2}{\sqrt{100}}  \le \mu \le 4.3 +1.96 \times \frac{2}{\sqrt{100}} \right)=0.95 \]
+\[P(3.91 \le \mu \le 4.69) = 0.95\] Y nos da una amplitud de
+\(4.69 - 3.91=0.78\).
+
+Vemos que al aumentar el tamaño de la muestra disminuyó la amplitud del
+intervalo de confianza, logrando así una mayor precisión en la
+estimación.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-11}{}
+Pero, ¿Qué pasaría ahora si con los mismos datos la varianza poblacional
+\(\sigma^2\) fuese 9 en lugar de 4?
+
+En este caso estamos pensando que la variable aumento de peso en los
+niños tiene una variabilidad mayor de niño a niño.
+
+\[ P\left(4.3 - 1.96 \times \frac{3}{\sqrt{40}}  \le \mu \le 4.3 +1.96 \times \frac{3}{\sqrt{40}} \right)=0.95 \]
+\[P(3.37 \le \mu \le 5.23) = 0.95\] Lo que nos da una amplitud de
+intervalo de \(5.23-3.37=1.86\).
+
+Si comparamos este intervalo con el primero que hemos construido, vemos
+que ahora se han ampliado los límites provocando una merma en la
+precisión de la estimación.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-12}{}
+\textbf{Y ¿Qué podemos decir de la confianza de la estimación?}
+
+Cuando se efectúa una estimación por intervalos, a medida que se
+incrementa el nivel de confianza se incrementa también la amplitud del
+intervalo y, en consecuencia, disminuye la precisión del mismo.
+
+Así, por ejemplo, si decidimos aumentar el \textbf{nivel de confianza}
+trabajando con \(1-0.01=\)\textbf{0.99}, el intervalo sería:
+
+\[ P\left(4.3 - 2.576 \times \frac{2}{\sqrt{40}}  \le \mu \le 4.3 +2.576 \times \frac{2}{\sqrt{40}} \right)=0.99 \]
+\[P(3.49 \le \mu \le 5.11) = 0.99\] Lo que nos da una amplitud de
+intervalo de \(5.11-3.49=\) \(1.62\). Luego, construyendo el intervalo
+con un \(99\%\) de confianza hemos aumentado nuestra seguridad en la
+estimación, pero a costa de una precisión menor.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-13}{}
+Pero, para evitar muchos cálculos y aprovechando la simetría de la
+distribución normal se expone la ecuación siguiente para el cálculo del
+intervalo de confianza de la media \((n\ge30)\):
+\[ P\left(\bar{X} - Z_\frac{\alpha}{2} \times \frac{\sigma}{\sqrt{n}}  \le \mu \le \bar{X} + Z_\frac{\alpha}{2} \times \frac{\sigma}{\sqrt{n}} \right)=1-\alpha \]
+Algunos autores expresan el intervalo como
+\(\bar{X} \pm Z_\frac{\alpha}{2} \times \frac{\sigma}{\sqrt{n}}\)
+
+\begin{longtable}[]{@{}rrr@{}}
+\toprule()
+Alfa & Coeficiente de Confianza & Z \\
+\midrule()
+\endhead
+0.10 & 0.90 & 1.645 \\
+0.05 & 0.95 & 1.960 \\
+0.01 & 0.99 & 2.576 \\
+\bottomrule()
+\end{longtable}
+\end{frame}
+
+\begin{frame}{Intervalo de la media con varianza desconocida}
+\protect\hypertarget{intervalo-de-la-media-con-varianza-desconocida}{}
+un caso muy común es cuando el investigador está obligado a trabajar con
+muestras chicas y pretende estimar la media poblacional con \(\sigma^2\)
+desconocida.
+
+En estos casos, dado que no se conoce la \(\sigma^2\), para estimar por
+intervalos al parámetro \(\mu\) debemos recurrir a un nuevo estadístico
+distribuido como una variable \emph{``t'' de Student}. Este estadístico
+surge de estandarizar la variable media muestral, pero tomando a \(S^2\)
+como estimador puntual de la varianza poblacional.
+\[t=\frac{\bar{X}-\mu}{\frac{S}{\sqrt{n}}}\]
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-14}{}
+Esta variable ya no se distribuye normalmente cuando el tamaño de la
+muestra es chico, en la práctica \(n<30\). Entonces
+\[\frac{\bar{X}-\mu}{\frac{S}{\sqrt{n}}} \sim t_{n-1}\] Donde \(n-1\),
+es el denominador con el que se calculó la varianza muestral \(S^2\).
+Este valor corresponde a los grados de libertad de la variable ``t'' de
+Student.
+
+Similarmente al caso de la normal obtenemos:
+\[ P\left(\bar{X} - t_{\frac{\alpha}{2},n-1} \times \frac{S}{\sqrt{n}}  \le \mu \le \bar{X} + t_{\frac{\alpha}{2},n-1} \times \frac{S}{\sqrt{n}} \right)=1-\alpha \]
+Algunos autores expresan el intervalo como
+\(\bar{X} \pm t_{\frac{\alpha}{2},n-1} \times \frac{\sigma}{\sqrt{n}}\)
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-15}{}
+Supongamos que un investigador desea estimar el rendimiento promedio de
+grasa que contiene la leche producida por vacas de cierta raza en un
+período de tiempo determinado.
+
+Para ello se extrae una muestra de 10 vacas lecheras, obteniendo:
+
+\(n=10\) , \(\bar{X}=36.4 grs\), \(s^2=264.04 grs^2\) y \(s=16.25 grs\)
+
+Por lo tanto \(s^2 /n = 264.04/10=26.404\) y \(s/\sqrt{n}=5.138 grs\)
+
+Los únicos datos que posee el investigador para llevar a cabo su
+investigación son la media y la varianza muestral.
+
+Como la muestra es chica y no conocemos la varianza poblacional
+\(\sigma^2\), el estadístico para confeccionar el correspondiente
+intervalo de confianza de \(\mu\), tendrá distribución \emph{t de
+Student} con \(n-1\) grados de libertad.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-16}{}
+Para un nivel de confianza del \(95\%\) y buscando convenientemente en
+la tabla de probabilidades de la distribución \emph{t de Student},
+obtenemos:\[t_{\frac{0.05}{2},10-1}=t_{0.025,9}=2.62\]
+
+El intervalo de confianza será
+\[ P\left(\bar{X} - t_{\frac{\alpha}{2},n-1} \times \frac{S}{\sqrt{n}}  \le \mu \le \bar{X} + t_{\frac{\alpha}{2},n-1} \times \frac{S}{\sqrt{n}} \right)=0.95 \]
+\[ P\left(36.4 - 2.62 \times 5.138  \le \mu \le 36.4 + 2.62 \times 5.138 \right)=0.95 \]
+\[ P\left(24.78  \le \mu \le 48.02 \right)=0.95 \] El promedio de grasa
+en la leche de dichos animales se estima entre un \(24.78\) grs y
+\(48.02\) grs con un nivel de confianza del \(95\%\).
+\end{frame}
+
+\begin{frame}{Intervalos de confianza para proporciones}
+\protect\hypertarget{intervalos-de-confianza-para-proporciones}{}
+Lo visto en la sección anterior se puede usar con el fin de determinar
+intervalos de confianza para la media de cualquier población se la que
+se haya extraido una muestra grande. Cuando la población tiene una
+distribución de Bernoulli, esta expresión toma una forma especial.
+
+Suponga que se tiene un proceso de fabricación y este tiene
+especificaciones. Se prueba una muestra de 144 productos y 120
+satisfacen la especificación. Sea \(p\) la proporción de artículos en la
+población que satisfacen dicha especificación. Se desea encontrar un
+intervalo de confianza de \(95\%\) para \(p\).
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-17}{}
+Se empieza construyendo un estimador de \(p\). Sea \(X\) el número de
+artículos en la muestra que satisface la especificación. Entonces
+\(X \sim Bin(n, p)\), donde \(n = 144\) es el tamaño muestral. El
+estimador de \(p\) es \(\hat{p}= X/n\). En este ejemplo, \(X = 120\),
+por lo que \(\hat{p}= 120/144 = 0.833\). La incertidumbre, o desviación
+estándar de \(\hat{p}\), es \(\sigma_{\hat{p}}=\sqrt{p(1-p)}\). Puesto
+que el tamaño muestral es grande, se tiene por el teorema del límite
+central que \[\hat{p} \sim N\left(p,\frac{p(1-p)}{n}  \right) \]
+
+Con un razonamiento similar a los casos anteriores se puede obtener
+\[ P\left( \hat{p} -Z_{\frac{\alpha}{2} } \sqrt{\frac{p(1-p)}{n} } \le p \le \hat{p} + Z_{\frac{\alpha}{2} } \sqrt{\frac{p(1-p)}{n} }\right) =1- \alpha\]
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-18}{}
+A primera vista la expresión anterior parece un intervalo de confianza
+con un nivel \(1-\alpha\) para \(p\). Sin embargo los límites contienen
+una \(p\) desconocida, y por eso no se puede calcular. El punto de vista
+tradicional es sustituir esa \(p\) por \(\hat{p}\). De tal manera que
+quedaría así:
+\[ P\left( \hat{p} -Z_{\frac{\alpha}{2} } \sqrt{\frac{ \hat{p}(1- \hat{p})}{n} } \le p \le \hat{p} + Z_{\frac{\alpha}{2} } \sqrt{\frac{ \hat{p}(1- \hat{p})}{n} }\right) =1- \alpha\]
+
+Algunos autores expresan el intervalo como
+\(\hat{p} \pm Z_\frac{\alpha}{2} \times \sqrt{\frac{\hat{p}(1-\hat{p})}{n}}\)
+
+Para el ejemplo obtenemos
+\(.833 \pm 1.96\times\sqrt{.833\times(1-.833)/144}\) es decir
+\(0.833 \pm 0.0609\) y por lo tanto el intervalo va de \(0.7721\) a
+\(0.8939\) con una confianza del \(95\%\).
+\end{frame}
+
+\begin{frame}{Intervalos de confianza para la varianza}
+\protect\hypertarget{intervalos-de-confianza-para-la-varianza}{}
+Para utilizar a \(S^2\) como estimador de \(\sigma^2\) necesitamos
+conocer su distribución de probabilidad. De esta manera podremos
+establecer un cierto coeficiente de confianza de la estimación.
+
+No existe una distribución conocida para \(S^2\) pero sí para cierta
+transformación del mismo. Si la muestra proviene de una población en la
+cual la variable en estudio se distribuye normalmente, tenemos
+\[(n-1)\frac{S^2}{\sigma^2} \sim \chi_{n-1}^2 \] donde \(\chi_{n-1}^2\)
+es la distribución Ji-cuadrada co \(n-1\) grados de libertad.
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-19}{}
+Una vez que contamos con esta información, podemos establecer un
+intervalo de confianza para estimar \(\sigma^2\), de la siguiente
+manera:
+\[ P\left( \chi_{1-\frac{\alpha}{2},n-1}^2 \le (n-1)\frac{S^2}{\sigma^2} \le \chi_{\frac{\alpha}{2},n-1}^2 \right)  = 1-\alpha \]
+
+Despejando tenemos
+\[ P\left( \frac{S^2 \times (n-1)}{\chi_{\frac{\alpha}{2},n-1}^2} \le \sigma^2 \le\frac{S^2 \times (n-1)}{\chi_{1-\frac{\alpha}{2},n-1}^2} \right)  = 1-\alpha \]
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-20}{}
+\textbf{Ejemplo}
+
+El Departamento de Control de Calidad de una empresa decide estudiar la
+homogeneidad de los productos comprados a un proveedor de materiales
+plásticos. Para ello toma 6 piezas de la producción de un envío y las
+somete a pruebas de resistencia. Las siguientes observaciones
+representan las cargas de rotura en unidades de 1,000 libras por pulgada
+cuadrada: 15.3, 18.7, 22.3, 17.6, 19.1 y 14.8
+
+El Departamento de Calidad ha determinado que interesa conocer la
+variabilidad de las cargas de rotura, pues la uniformidad de este insumo
+es fundamental en el proceso de producción de la fábrica.
+
+Como primera medida y habiendo comprobado que la variable cargas de
+rotura tiene distribución normal. Se procede a construir un intervalo de
+confianza del \(90\%\):
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-21}{}
+\(S^2=7.575\), \(n-1=5\), \(\alpha=0.1\) por lo tanto
+\(\chi_{.05,5}=11.07\) y \(\chi_{.95,5}=1.15\), y el intervalo de
+confianza sería
+\[ P\left( \frac{7.575 \times (5)}{\chi_{\frac{0.10}{2},5}^2} \le \sigma^2 \le\frac{7.575 \times (5)}{\chi_{1-\frac{0.10}{2},5}^2} \right)  = 0.90 \]
+\[ P\left( 3.42 \le \sigma^2 \le 32.93 \right)  = 0.90 \]
+
+Es decir el intevalo es de confianza de la varianza a un nivel de
+\(90\%\) es \((3.42,32.93)\).
+\end{frame}
+
+\begin{frame}{Obtención de Intervalos de confianza con R}
+\protect\hypertarget{obtenciuxf3n-de-intervalos-de-confianza-con-r}{}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1275}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1176}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2843}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.4706}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+Una muestra
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parámetro
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Función
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Ejemplo
+\end{minipage} \\
+\midrule()
+\endhead
+Media & \(\mu\) & t.test & t.test(x=altura,
+conf.level=0.90)\$conf.int \\
+Proporción & \(p\) & prop.test & prop.test(x=275, n=500,
+conf.level=0.90)\$conf.int \\
+Varianza & \(\sigma^2\) & stests::var.test() & var.test(x=altura,
+conf.level=0.98)\$conf.int \\
+& & & \\
+\bottomrule()
+\end{longtable}
+\end{frame}
+
+\begin{frame}{}
+\protect\hypertarget{section-22}{}
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.2011}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.0862}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.1092}}
+  >{\raggedright\arraybackslash}p{(\columnwidth - 6\tabcolsep) * \real{0.6034}}@{}}
+\toprule()
+\begin{minipage}[b]{\linewidth}\raggedright
+Diferencia de
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Parámetro
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Función
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+Ejemplo
+\end{minipage} \\
+\midrule()
+\endhead
+Medias de muestras independientes & \(\mu_1-\mu_2\) & t.test &
+t.test(x=hombres\$altura, y=mujeres\$altura,,paired=FALSE,
+var.equal=FALSE,conf.level = 0.95)\$conf.int \\
+Medias de muestras pareadas & \(\mu_1-\mu_2\) & t.test & t.test(x=Antes,
+y=Despues, paired=TRUE, conf.level=0.95)\$conf.int \\
+Proporciones & \(p_1-p_2\) & prop.test & prop.test(x=c(75, 80),
+n=c(1500, 2000), conf.level=0.90)\$conf.int \\
+Varianza & \(\sigma^2\) & stests::var.test() &
+var.test(x=hombres\$altura,
+y=mujeres\$altura,,conf.level=0.95)\$conf.int \\
+\bottomrule()
+\end{longtable}
+
+\href{https://fhernanb.github.io/Manual-de-R/ic.html}{Intervalos de
+confianza en R}
+\end{frame}
+
+\end{document}
