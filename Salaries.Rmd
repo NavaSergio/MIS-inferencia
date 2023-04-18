@@ -102,9 +102,100 @@ with(Salaries,table(sex,rank))
 ```{r}
 modelo2 <- lm(salary ~ sex*rank,data = Salaries)
 summary(modelo2)
+contrasts(Salaries$sex)
+contrasts(Salaries$rank)
 ```
 
 ```{r}
-model.matrix(modelo2)
+Salaries %>% group_by(sex,rank) %>% summarise(media=mean(salary))
 ```
+
+Los coeficientes listados abajo
+
+- **(Intercept)** salario para *Male*  y *AsstProf* (`r format(round(81311.46),scientific = FALSE)`).
+- **sexFemale** Diferencia en salario entre *Female* y *Male* para *AsstProf* (78049.91-81311.46=`r 78049.91-81311.46`)
+- **rankAssocProf** Diferencia en salario entre *AssocProf* y *AsstProf* para *Male* (94869.70-81311.46=`r format(round(94869.70-81311.46),scientific=FALSE)`)
+- **rankProf** Diferencia en salario entre *Prof* y *AsstProf* para *Male* (127120.82-81311.46=`r format(round(127120.82-81311.46),scientific = FALSE)`)
+- **sexFemale:rankAssocProf** Diferencia adicional en salario entre *AssocProf* y *AsstProf* para *Female* ((88512.80-78049.91)-(94869.70-81311.46)=`r format(round(88512.80-78049.91)-round(94869.70-81311.46),scientific = FALSE)`)
+- **sexFemale:rankProf** Diferencia adicional en salario entre *Prof* y *AsstProf* para *Female* ((121967.61-78049.91)-(127120.82-81311.46)=`r format(round(121967.61-78049.91)-round(127120.82-81311.46),scientific = FALSE)`)
+
+
+El resultado del modelo incluye pruebas de las hipótesis nulas de que estas diferencias son iguales a cero. Sin embargo, nos puede interesar comparar otras combinaciones de `rank` y `sex` Podemos calcular manualmente estas diferentes combinaciones con algo de aritmética, pero ¿qué pasa si queremos probar la importancia de estas diferencias?
+
+
+```{r message=FALSE, warning=FALSE}
+library(multcomp)
+```
+
+
+Podemos hacerlo definiendo un contraste de interés y probándolo con el comando **glht** (generalized linear hypothesis test) en el paquete `multcomp`. Para definir el contraste, podemos observar el orden en que se presentan los coeficientes en la salida y luego crear un vector de la longitud de la lista de coeficientes (incluida la intersección). Para empezar, podemos comparar *AssocProf* y *Prof* de `rank` para `Male`. Por lo tanto, queremos probar la diferencia entre los coeficientes tercero y cuarto en nuestra salida. Después de crear nuestro vector de contraste, lo pasamos junto con el objeto modelo a `glht.` Luego, para ver el resultado, miramos un resumen de nuestro objeto `glht`.
+
+```{r}
+# difference between rank  *AssocProf* y *Prof* cuando *Male* 
+K <- matrix(c(0, 0, 1, -1, 0, 0), 1)
+t <- glht(modelo2, linfct = K)
+summary(t)
+```
+
+Que, como puede observar, corresponde a *Male*, *AssocProf*- *Prof* =94869.70-127120.82=(`r format(round(94869.70-127120.82),scientific = FALSE)`)
+
+```{r}
+modelo2$coef[3] - modelo2$coef[4]
+```
+
+Podemos ver un contraste un poco más complicado, comparando los niveles *AssocProf* y *Prof* de *rank* para *Female* :
+
+```{r}
+# difference between rank  *AssocProf* y *Prof* cuando *Female* 
+K <- matrix(c(0, 0, 1, -1, 1, -1), 1)
+t <- glht(modelo2, linfct = K)
+summary(t)
+```
+
+Diferencia en salario entre *AsstProf* y *Prof*  para *Female* ((88512.80-121967.61)=`r format(round(88512.80-121967.61),scientific = FALSE)`).
+
+Para probar las "diferencias de diferencias" (es la diferencia entre *AssocProf* y *Prof* diferente para *Male* vs. *Female*) podemos definir nuestro contraste como la diferencia en los vectores que definimos arriba y probar esto usando glht:
+
+
+```{r}
+# looking at the difference of differences
+# difference between rank  *AssocProf* y *Prof* cuando *Male* 
+K1 <- matrix(c(0, 0, 1, -1, 0, 0), 1)
+# difference between rank  *AssocProf* y *Prof* cuando *Female* 
+K2 <- matrix(c(0, 0, 1, -1, 1, -1), 1)
+# difference of differences
+(K <- K1 - K2)
+```
+
+Arriba está el vector resultante de coeficientes de contraste para probar esta diferencia de diferencias. Ahora probamos este contraste para la significancia
+
+```{r}
+t <- glht(modelo2, linfct = K)
+summary(t)
+```
+
+Como puede observar la diferencia entre *AssocProf* y *Prof* no difiere mucho entre *Male* vs. *Female*, es de 1204, y no es significativa. 
+
+También podemos probar todas las posibles combinaciones por pares. Para hacer esto más fácil, primero crearemos una variable de "interaction" (usando la función interaction) cuyos niveles se crean como una combinación de los niveles de *rank* y *sex*.
+
+
+```{r}
+# all pairwise comparsions
+# creating a BIG group variable
+Salaries$todos <- with(Salaries, interaction(sex, rank, sep = "X"))
+head(Salaries$todos )
+```
+
+Todas las comparaciones por pares se pueden calcular automáticamente ingresando la variable de interacción en el modelo como un predictor único.
+
+```{r}
+modelo3 <- lm(salary ~  todos, data = Salaries)
+l3 <- glht(modelo3, linfct = mcp(todos = "Tukey"))
+summary(l3)
+```
+
+```{r}
+summary(modelo3)
+```
+
 

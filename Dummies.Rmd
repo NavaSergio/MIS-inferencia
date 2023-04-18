@@ -1,0 +1,146 @@
+---
+title: "Panel"
+author: "Sergio Nava"
+date: "2023-04-17"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(car)
+```
+
+## Variables Dummy
+
+Usaremos el conjunto de datos de *Salaries* [*car*], que contiene el salario académico de nueve meses de 2008-09 para profesores asistentes, profesores asociados y profesores en una universidad en los EE. UU. Los datos se recopilaron como parte del esfuerzo continuo de la administración de la universidad para monitorear las diferencias salariales entre los profesores masculinos y femeninos.
+
+
+```{r}
+# Load the data
+data("Salaries", package = "carData")
+# Inspect the data
+str(Salaries)
+summary(Salaries)
+```
+
+Una **variable indicadora**, o **variable ficticia**, es una variable de entrada que representa datos cualitativos, como género, raza, etc. Por lo general, las variables ficticias a veces se denominan variables binarias porque generalmente toman solo dos valores, 1 o 0, con 1 generalmente representando la presencia de una característica y 0 representando la ausencia. Por ejemplo, si tuviéramos una variable ficticia llamada *hombre*, 1 indicaría que el individuo es *hombre* y 0 indicaría que el individuo es *mujer* (o *no hombre* para ser más precisos). Usar un 1 y un 0 para representar la presencia o ausencia de una característica particular es arbitrario, pero como veremos, es muy conveniente. En general, podemos definir una variable ficticia D como
+
+\[\begin{equation}
+  D =
+    \begin{cases}
+      1 & \text{si está presente la carcaterística}\\
+      0 & \text{si no está presente la característica}
+    \end{cases}       
+\end{equation}\]
+
+Las variables ficticias se pueden utilizar para capturar cambios en la intersección, la pendiente o ambas del modelo, como veremos más adelante.
+
+## Variables Dummy para intercepto
+
+
+Quizás el uso más común de las variables ficticias es modificar el parámetro de intercepción del modelo de regresión. Agregar una variable indicadora D al modelo, junto con un  $\beta_1$ nos da
+
+\[\begin{equation}
+y = \beta_0 + \beta_1 D + \beta_2 x +\epsilon
+\end{equation}\]
+
+
+Suponga que se tiene un modelo de regrsión donde *sex* representa *Male*(1) o *Female*(0). En nuestro modelo la variable independiente es *salary*, con otra variable independiente *yrs.service*, que indica la cantidad de años de servicio que tiene un profesor. El modelo se representa de la siguiente forma
+
+
+\[\begin{equation}
+  E(salary) =
+    \begin{cases}
+      (\beta_0 + \beta_1)+\beta_2 yrs.service & sex=Male=1\\
+      \beta_0+\beta_2 yrs.service & sex=Female=0
+    \end{cases}       
+\end{equation}\]
+
+
+```{r}
+modelo1 <- lm(salary ~ sex + yrs.service , data = Salaries )
+summary(modelo1)
+yhat <- modelo1$fitted
+scatterplot(yhat~yrs.service|sex, boxplots=FALSE, xlab="yrs.service", ylab="yhat",smooth=FALSE, data = Salaries)
+abline(lm(salary ~ yrs.service, data=Salaries),lwd=3, col="red")
+```
+
+Para los hombres, el intercepto en el modelo es $(\beta_0 + \beta_1)=$ `r format(modelo1$coefficients[1],scientific=F,big.mark   = ",")`+`r format(modelo1$coefficients[2],scientific=F,big.mark   = ",")`=`r format(modelo1$coefficients[1]+ modelo1$coefficients[2],scientific=F,big.mark   = ",")` y para las mujeres es $\beta_0=$ `r format(modelo1$coefficients[1],scientific=F,big.mark   = ",")`
+
+```{r}
+yhat <- modelo1$fitted
+scatterplot(yhat~yrs.service|sex, boxplots=FALSE, xlab="yrs.service", ylab="yhat",smooth=FALSE, data = Salaries)
+```
+
+Las pendientes de las dos líneas son las mismas, pero sus intersecciones, como se señaló anteriormente, son diferentes. Podemos interpretar la figura como: "Para dos personas con los mismo años de servicio, el profesor que es hombre tiene un ingreso esperado $\beta_1$ más que mujer".
+
+Otra forma de parametrizar este modelo es de la siguiente forma.
+
+```{r}
+modelo1.1 <- lm(salary ~ sex + yrs.service - 1 , data = Salaries )
+summary(modelo1.1)
+```
+
+Como se puede observar, con esta parametrización, para las mujeres, el intercepto en el modelo es $\beta_0=$ `r format(modelo1.1$coefficients[1],scientific=F,big.mark   = ",")` y para los hombres es $\beta_1=$ `r format(modelo1.1$coefficients[2],scientific=F,big.mark   = ",")`
+
+## Variables Dummy para pendiente
+
+También se pueden introducir variables ficticias para afectar la pendiente de un modelo de regresión. En lugar de suponer que el efecto del genero provoca un cambio en el intercepto en nuestro modelo anterior, supongamos que el cambio está en la pendiente de la relación. Para lograr esto, podemos permitir el cambio en una pendiente al incluir una variable explicativa adicional en nuestro modelo que sea igual al producto de una variable ficticia y una variable continua. En tal modelo, la pendiente de la relación es el valor de un aumento de una unidad en la experiencia laboral. Podemos especificar una forma genérica de tal modelo como
+
+
+\[\begin{equation}
+y = \beta_0 + \beta_1 x + \beta_2 (x \times D) +\epsilon
+\end{equation}\]
+
+La nueva variable $(x \times D)$ es el producto de $x$ y la variable ficticia $D$. Esto es lo que se llama una variable de interacción, ya que captura el efecto de interacción de la variable continua $x$ y la variable ficticia $D$. Alternativamente, también se la denomina variable indicadora de pendiente o variable ficticia de pendiente, porque permite un cambio en la pendiente de la relación. Usando nuestro ejemplo actual, nuestro modelo de regresión que describe los efectos de interacción de los años de servicio y el género se puede escribir como:
+
+\[\begin{equation}
+salary = \beta_0 + \beta_1 yrs.service + \beta_2 (yrs.service \times sex) +\epsilon
+\end{equation}\]
+
+A pesar de su naturaleza inusual, la variable ficticia de pendiente se trata como cualquier otra variable explicativa en un modelo de regresión. El análisis del modelo de regresión para los dos grupos individuales diferentes ilustra mejor el efecto de la inclusión de la variable ficticia de pendiente en el modelo económico.
+
+Para los hombres, su ingreso por año adicional de servicio es $(\beta_1+\beta_2)$, mientras que para las mujeres, el ingreso por año adicional de servicio es simplemente $\beta_1$.
+
+
+
+\[\begin{equation} 
+  E(salary) = \beta_0 + \beta_1 yrs.service + \beta_2 (yrs.service \times sex) =
+    \begin{cases}
+      \beta_0 + (\beta_1+\beta_2) yrs.service & sex=Male=1\\
+      \beta_0+\beta_1 yrs.service & sex=Female=0
+    \end{cases}       
+\end{equation}\]
+
+Otra forma de ver el efecto de incluir una variable ficticia de pendiente es usar un poco de cálculo. La derivada parcial de los ingresos esperados con respecto a los años de servicio nos da la pendiente de la relación. Eso es,
+
+
+
+\[\begin{equation} 
+  \frac{\partial E(salary)}{\partial yrs.service } = 
+    \begin{cases}
+      (\beta_1+\beta_2)  & \text{cuando }sex=Male=1\\
+      \beta_1  & \text{cuando }sex=Female=0
+    \end{cases}       
+\end{equation}\]
+
+
+
+```{r}
+modelo2 <- lm(salary ~ yrs.service + sex:yrs.service , data = Salaries )
+summary(modelo2)
+yhat <- modelo2$fitted
+scatterplot(yhat~yrs.service|sex, boxplots=FALSE, xlab="yrs.service", ylab="yhat",smooth=FALSE, data = Salaries)
+```
+
+
+
+
+```{r}
+modelo3 <- lm(salary ~ sex+ yrs.service + sex:yrs.service, data = Salaries )
+summary(modelo3)
+yhat <- modelo3$fitted
+scatterplot(yhat~yrs.service|sex, boxplots=FALSE, xlab="yrs.service", ylab="yhat",smooth=FALSE, data = Salaries)
+```
