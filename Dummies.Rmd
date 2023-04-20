@@ -144,3 +144,27 @@ summary(modelo3)
 yhat <- modelo3$fitted
 scatterplot(yhat~yrs.service|sex, boxplots=FALSE, xlab="yrs.service", ylab="yhat",smooth=FALSE, data = Salaries)
 ```
+
+
+
+```{r}
+modelo3 <- lm(salary ~ sex+ yrs.service + sex:yrs.service -1,
+              data = Salaries )
+summary(modelo3)
+yhat <- modelo3$fitted
+scatterplot(yhat~yrs.service|sex, boxplots=FALSE, xlab="yrs.service", ylab="yhat",smooth=FALSE, data = Salaries)
+```
+
+
+
+
+
+
+
+```{r}
+modelo4 <- lm(salary ~ yrs.since.phd + discipline:yrs.since.phd,
+              data = Salaries )
+summary(modelo4)
+yhat <- modelo4$fitted
+scatterplot(salary~yrs.since.phd|discipline, boxplots=FALSE, xlab="yrs.since.phd", ylab="yhat",smooth=FALSE, data = Salaries)
+```

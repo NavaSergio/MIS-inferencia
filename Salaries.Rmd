@@ -198,4 +198,3 @@ summary(l3)
 summary(modelo3)
 ```
 
-
