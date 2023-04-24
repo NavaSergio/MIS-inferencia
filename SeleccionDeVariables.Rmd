@@ -173,3 +173,76 @@ data(Boston,package = "MASS")
 |                     | por zona                                          |
 | medv                | Valor mediano de las viviendas ocupadas por sus    |
 |                     | propietarios en $1,000s                           |
+
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(1233)
+ind <- sample(2, nrow(Boston), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- Boston[ind == 1, ]
+test_data <- Boston[ind == 2, ]
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(medv ~ ., data=train_data)
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_full <- predict(model_full, newdata=test_data)
+rmse_full <- sqrt(mean((test_data$medv - pred_full)^2))
+rmse_full
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(medv ~ ., data=train_data)
+
+# Realizamos la eliminación hacia atrás
+model_backward <- step(model_full, direction="backward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_backward <- predict(model_backward, newdata=test_data)
+rmse_backward <- sqrt(mean((test_data$medv - pred_backward)^2))
+rmse_backward
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
+model_forward <- lm(medv ~ 1, data=train_data)
+
+# Realizamos la selección hacia adelante
+model_forward <- step(model_forward, scope=formula(model_full), direction="forward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_forward <- predict(model_forward, newdata=test_data)
+rmse_forward <- sqrt(mean((test_data$medv - pred_forward)^2))
+rmse_forward
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
+model_both <- lm(medv ~ 1, data=train_data)
+
+# Realizamos la selección hacia adelante
+model_both <- step(model_both, scope=formula(model_full), direction="both")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_both <- predict(model_both, newdata=test_data)
+rmse_both <- sqrt(mean((test_data$medv - pred_both)^2))
+rmse_both
+```
+```{r}
+summary(model_backward)
+plot(model_backward)
+hist(Boston$medv)
+```
+
