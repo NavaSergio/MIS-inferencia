@@ -1,0 +1,127 @@
+---
+title: "varios modelos"
+author: "Sergio Nava"
+date: "2023-04-27"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## mtcars
+
+```{r mtcars}
+data("mtcars")
+lm1 <- lm(mpg ~ wt, data = mtcars)
+summary(lm1)
+plot(lm1, which = 1)
+```
+
+
+```{r mtcars-lm2}
+lm2 <- lm(mpg ~ wt + I(wt^2), data = mtcars)
+summary(lm2)
+plot(lm2, which = 1)
+```
+
+## Orange
+
+```{r Orange}
+data("Orange")
+lm1 <- lm(circumference ~ age, data = Orange)
+summary(lm1)
+plot(lm1, which = 1)
+```
+
+
+```{r Orange-lm2}
+lm2 <- lm(log(circumference) ~ age, data = Orange)
+summary(lm2)
+plot(lm2, which = 1)
+```
+
+```{r Orange-lm3}
+lm3 <- lm(log(circumference) ~ age+I(age^2), data = Orange)
+summary(lm3)
+plot(lm3, which = 1)
+```
+
+
+## ChickWeight
+
+```{r ChickWeight}
+lm1 <- lm(weight ~ Time, data = ChickWeight[ChickWeight$Chick == 1,])
+summary(lm1)
+plot(lm1, which = 1)
+```
+
+
+```{r ChickWeight-lm2}
+lm2 <- lm(weight ~ Time + I(Time^2), data = ChickWeight[ChickWeight$Chick == 1,])
+summary(lm2)
+plot(lm2, which = 1)
+
+```
+
+## cars
+
+```{r cars}
+lm1 <- lm(dist ~ speed, data = cars)
+summary(lm1)
+plot(lm1, which = 1)
+```
+
+
+```{r cars-lm2}
+lm2 <- lm(dist ~ log(speed), data = cars)
+summary(lm2)
+plot(lm2, which = 1)
+```
+
+
+```{r cars-lm3}
+lm3 <- lm(dist ~ log(speed)+I(log(speed)^2), data = cars)
+summary(lm3)
+plot(lm3, which = 1)
+```
+
+## faithful
+
+```{r faithful}
+data(faithful)
+lm1 <- lm(waiting ~ eruptions, data = faithful)
+summary(lm1)
+plot(lm1, which = 1)
+```
+
+
+```{r faithful-lm2}
+lm2 <- lm(waiting ~ log(eruptions), data = faithful)
+summary(lm2)
+plot(lm2, which = 1)
+
+```
+
+## CO2
+
+```{r CO2}
+data(CO2)
+lm1 <- lm(uptake ~ conc, data = CO2)
+summary(lm1)
+plot(lm1, which = 1)
+```
+
+
+```{r CO2-lm2}
+lm2 <- lm(uptake ~ log(conc), data = CO2)
+summary(lm2)
+plot(lm2, which = 1)
+```
+
+
+```{r CO2-lm3}
+lm3 <- lm(log(uptake) ~ log(conc)+I(log(conc)^2), data = CO2)
+summary(lm3)
+plot(lm3, which = 1)
+```
