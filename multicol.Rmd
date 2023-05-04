@@ -1,7 +1,7 @@
 ---
-title: "Seleccion de variables"
+title: "Multicolinealidad"
 author: "Sergio Nava"
-date: "2023-04-24"
+date: "2023-05-4"
 output: html_notebook
 ---
 
@@ -10,29 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(car)
 ```
 
-## Máxima Verosimilitud
-
-La función de verosimilitud (likelihood function) para Regresión Lineal Múltiple (RLM) se puede calcular utilizando la distribución normal multivariante.
-
-Dada una matriz de diseño $X$ (que incluye la columna de unos correspondiente al término constante) y un vector de parámetros $\beta$, la función de verosimilitud se define como:
-\[L(\beta|X,y)=(2\pi)^{-n/2}\cdot det(\Sigma)^{-1/2}\cdot exp(-\frac{1}{2}(y-X\beta)'\Sigma^{-1}(y-X\beta))\]
-donde $y$ es el vector de respuestas, $n$ es el número de observaciones, $\Sigma$ es la matriz de covarianza de los errores aleatorios (asumidos como normales e independientes) y $\det()$ se refiere al determinante de la matriz.
-
-En la práctica, la función de verosimilitud se maximiza para obtener los estimadores de máxima verosimilitud (MLE) de los parámetros $\beta$. Esto se puede hacer utilizando técnicas de optimización numérica, como el método de Newton-Raphson o el descenso de gradiente.
-
-En R, se pueden utilizar funciones como glm() o lm() para ajustar modelos de regresión lineal y obtener los valores de la función de verosimilitud. Por ejemplo:
-
-## AIC (Akaike Information Criterion)
-
-El AIC (Akaike Information Criterion) es una medida de la calidad del ajuste de un modelo estadístico que penaliza los modelos más complejos. El AIC se define como:
-
-\[AIC = 2k - 2ln(L),\]
-
-donde $k$ es el número de parámetros del modelo y $L$ es la función de verosimilitud del modelo. El objetivo del AIC es encontrar el modelo que tenga la menor distancia de información de Akaike (AIC) y, por lo tanto, se ajuste mejor a los datos observados.
-
-Un ejemplo en el que se puede utilizar el AIC es en la selección de modelos para un conjunto de datos. Supongamos que tenemos un conjunto de datos que queremos ajustar con diferentes modelos de regresión lineal múltiple. Podemos utilizar el AIC para seleccionar el modelo que tenga el menor AIC, lo que indica que ese modelo se ajusta mejor a los datos.
-
-A continuación, presento un ejemplo de cómo utilizar el AIC en R para seleccionar el mejor modelo de regresión lineal múltiple para un conjunto de datos. En este ejemplo, utilizaremos el conjunto de datos mtcars que viene precargado en R:
+##  VIF
 
 ```{r}
 # Cargamos el conjunto de datos mtcars
@@ -75,6 +53,7 @@ rmse_best
 vif(model1)
 vif(model2)
 vif(model3)
+vif(lm(mpg ~ disp + hp, data=train_data))
 plot(mtcars[,c("wt","disp","hp")])
 cor(mtcars[,c("wt","disp","hp")])
 ```
@@ -134,25 +113,6 @@ rmse_backward
 
 vif(model_backward)
 ```
-
-Finalmente, realizamos la selección de características utilizando el método de selección hacia adelante:
-
-```{r}
-# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
-model_forward <- lm(mpg ~ 1, data=train_data)
-
-# Realizamos la selección hacia adelante
-model_forward <- step(model_forward, scope=formula(model_full), direction="forward")
-
-# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
-pred_forward <- predict(model_forward, newdata=test_data)
-rmse_forward <- sqrt(mean((test_data$mpg - pred_forward)^2))
-rmse_forward
-```
-
-
-Este es un ejemplo básico de cómo utilizar los métodos de selección de características backward elimination y forward selection para regresión lineal múltiple en R utilizando el conjunto de datos mtcars. Por supuesto, los resultados pueden variar dependiendo del conjunto de datos y del problema que se esté abordando.
-
 
 
 ## Ejercicio (Boston)
@@ -227,35 +187,6 @@ rmse_backward
 vif(model_backward)
 ```
 
-
-
-```{r}
-# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
-model_forward <- lm(medv ~ 1, data=train_data)
-
-# Realizamos la selección hacia adelante
-model_forward <- step(model_forward, scope=formula(model_full), direction="forward")
-
-# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
-pred_forward <- predict(model_forward, newdata=test_data)
-rmse_forward <- sqrt(mean((test_data$medv - pred_forward)^2))
-rmse_forward
-```
-
-
-
-```{r}
-# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
-model_both <- lm(medv ~ 1, data=train_data)
-
-# Realizamos la selección hacia adelante
-model_both <- step(model_both, scope=formula(model_full), direction="both")
-
-# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
-pred_both <- predict(model_both, newdata=test_data)
-rmse_both <- sqrt(mean((test_data$medv - pred_both)^2))
-rmse_both
-```
 ```{r}
 summary(model_backward)
 plot(model_backward)
@@ -264,5 +195,7 @@ hist(Boston$medv)
 ```{r}
 plot(~ lstat + rm + ptratio + dis + nox + chas + black + rad + 
     tax + crim + zn,data = Boston)
+cor(Boston[,c("lstat","rm","ptratio","dis","nox","chas","black","rad","tax","crim","zn")])
+hist(Boston$tax)
 ```
 
