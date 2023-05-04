@@ -1,0 +1,268 @@
+---
+title: "Seleccion de variables"
+author: "Sergio Nava"
+date: "2023-04-24"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(car)
+```
+
+## Máxima Verosimilitud
+
+La función de verosimilitud (likelihood function) para Regresión Lineal Múltiple (RLM) se puede calcular utilizando la distribución normal multivariante.
+
+Dada una matriz de diseño $X$ (que incluye la columna de unos correspondiente al término constante) y un vector de parámetros $\beta$, la función de verosimilitud se define como:
+\[L(\beta|X,y)=(2\pi)^{-n/2}\cdot det(\Sigma)^{-1/2}\cdot exp(-\frac{1}{2}(y-X\beta)'\Sigma^{-1}(y-X\beta))\]
+donde $y$ es el vector de respuestas, $n$ es el número de observaciones, $\Sigma$ es la matriz de covarianza de los errores aleatorios (asumidos como normales e independientes) y $\det()$ se refiere al determinante de la matriz.
+
+En la práctica, la función de verosimilitud se maximiza para obtener los estimadores de máxima verosimilitud (MLE) de los parámetros $\beta$. Esto se puede hacer utilizando técnicas de optimización numérica, como el método de Newton-Raphson o el descenso de gradiente.
+
+En R, se pueden utilizar funciones como glm() o lm() para ajustar modelos de regresión lineal y obtener los valores de la función de verosimilitud. Por ejemplo:
+
+## AIC (Akaike Information Criterion)
+
+El AIC (Akaike Information Criterion) es una medida de la calidad del ajuste de un modelo estadístico que penaliza los modelos más complejos. El AIC se define como:
+
+\[AIC = 2k - 2ln(L),\]
+
+donde $k$ es el número de parámetros del modelo y $L$ es la función de verosimilitud del modelo. El objetivo del AIC es encontrar el modelo que tenga la menor distancia de información de Akaike (AIC) y, por lo tanto, se ajuste mejor a los datos observados.
+
+Un ejemplo en el que se puede utilizar el AIC es en la selección de modelos para un conjunto de datos. Supongamos que tenemos un conjunto de datos que queremos ajustar con diferentes modelos de regresión lineal múltiple. Podemos utilizar el AIC para seleccionar el modelo que tenga el menor AIC, lo que indica que ese modelo se ajusta mejor a los datos.
+
+A continuación, presento un ejemplo de cómo utilizar el AIC en R para seleccionar el mejor modelo de regresión lineal múltiple para un conjunto de datos. En este ejemplo, utilizaremos el conjunto de datos mtcars que viene precargado en R:
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+data(mtcars)
+
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(123)
+ind <- sample(2, nrow(mtcars), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- mtcars[ind == 1, ]
+test_data <- mtcars[ind == 2, ]
+
+# Ajustamos diferentes modelos de regresión lineal múltiple con diferentes combinaciones de características
+model1 <- lm(mpg ~ wt + disp + hp, data=train_data)
+model2 <- lm(mpg ~ wt + disp, data=train_data)
+model3 <- lm(mpg ~ wt + hp, data=train_data)
+
+# Calculamos el AIC de cada modelo
+(AIC1 <- AIC(model1))
+(AIC2 <- AIC(model2))
+(AIC3 <- AIC(model3))
+
+# Seleccionamos el modelo con el menor AIC
+if(AIC1 < AIC2 & AIC1 < AIC3) {
+  model_best <- model1
+} else if(AIC2 < AIC1 & AIC2 < AIC3) {
+  model_best <- model2
+} else {
+  model_best <- model3
+}
+
+# Evaluamos el desempeño del modelo seleccionado utilizando el conjunto de prueba
+pred_best <- predict(model_best, newdata=test_data)
+rmse_best <- sqrt(mean((test_data$mpg - pred_best)^2))
+rmse_best
+
+```
+
+
+```{r}
+vif(model1)
+vif(model2)
+vif(model3)
+plot(mtcars[,c("wt","disp","hp")])
+cor(mtcars[,c("wt","disp","hp")])
+```
+
+
+
+## Selección de variables (características)
+
+
+
+Primero, cargamos el conjunto de datos `mtcars` y lo dividimos en un conjunto de entrenamiento y un conjunto de prueba:
+
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+data(mtcars)
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(123)
+ind <- sample(2, nrow(mtcars), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- mtcars[ind == 1, ]
+test_data <- mtcars[ind == 2, ]
+```
+
+
+
+
+Luego, ajustamos un modelo de regresión lineal múltiple utilizando todas las características disponibles y evaluamos su desempeño utilizando el conjunto de prueba:
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(mpg ~ ., data=train_data)
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_full <- predict(model_full, newdata=test_data)
+rmse_full <- sqrt(mean((test_data$mpg - pred_full)^2))
+rmse_full
+
+vif(model_full)
+```
+
+
+A continuación, realizamos la selección de características utilizando el método de eliminación hacia atrás:
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(mpg ~ ., data=train_data)
+
+# Realizamos la eliminación hacia atrás
+model_backward <- step(model_full, direction="backward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_backward <- predict(model_backward, newdata=test_data)
+rmse_backward <- sqrt(mean((test_data$mpg - pred_backward)^2))
+rmse_backward
+
+vif(model_backward)
+```
+
+Finalmente, realizamos la selección de características utilizando el método de selección hacia adelante:
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
+model_forward <- lm(mpg ~ 1, data=train_data)
+
+# Realizamos la selección hacia adelante
+model_forward <- step(model_forward, scope=formula(model_full), direction="forward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_forward <- predict(model_forward, newdata=test_data)
+rmse_forward <- sqrt(mean((test_data$mpg - pred_forward)^2))
+rmse_forward
+```
+
+
+Este es un ejemplo básico de cómo utilizar los métodos de selección de características backward elimination y forward selection para regresión lineal múltiple en R utilizando el conjunto de datos mtcars. Por supuesto, los resultados pueden variar dependiendo del conjunto de datos y del problema que se esté abordando.
+
+
+
+## Ejercicio (Boston)
+
+```{r}
+data(Boston,package = "MASS")
+```
+
+
+| Variable predictora | Descripción                                       |
+|---------------------|---------------------------------------------------|
+| crim                | Tasa de criminalidad per cápita por zona          |
+| zn                  | Proporción de terrenos residenciales en zonas de   |
+|                     | más de 25,000 pies cuadrados por zona              |
+| indus               | Proporción de acres comerciales no minoristas     |
+|                     | por zona                                          |
+| chas                | Variable ficticia del río Charles (= 1 si la zona |
+|                     | limita con el río; 0 en caso contrario)            |
+| nox                 | Concentración de óxidos nítricos (partes por 10    |
+|                     | millones)                                        |
+| rm                  | Número medio de habitaciones por vivienda         |
+| age                 | Proporción de unidades ocupadas por sus           |
+|                     | propietarios construidas antes de 1940             |
+| dis                 | Distancias ponderadas a cinco centros de empleo    |
+| rad                 | Índice de accesibilidad a carreteras radiales      |
+| tax                 | Tasa de impuesto a la propiedad por valor en $     |
+| ptratio             | Proporción alumno-profesor por zona               |
+| black               | Proporción de negros por zona                      |
+| lstat               | Porcentaje de la población de bajo estatus social  |
+|                     | por zona                                          |
+| medv                | Valor mediano de las viviendas ocupadas por sus    |
+|                     | propietarios en $1,000s                           |
+
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(1233)
+ind <- sample(2, nrow(Boston), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- Boston[ind == 1, ]
+test_data <- Boston[ind == 2, ]
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(medv ~ ., data=train_data)
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_full <- predict(model_full, newdata=test_data)
+rmse_full <- sqrt(mean((test_data$medv - pred_full)^2))
+rmse_full
+
+vif(model_full)
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(medv ~ ., data=train_data)
+
+# Realizamos la eliminación hacia atrás
+model_backward <- step(model_full, direction="backward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_backward <- predict(model_backward, newdata=test_data)
+rmse_backward <- sqrt(mean((test_data$medv - pred_backward)^2))
+rmse_backward
+
+vif(model_backward)
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
+model_forward <- lm(medv ~ 1, data=train_data)
+
+# Realizamos la selección hacia adelante
+model_forward <- step(model_forward, scope=formula(model_full), direction="forward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_forward <- predict(model_forward, newdata=test_data)
+rmse_forward <- sqrt(mean((test_data$medv - pred_forward)^2))
+rmse_forward
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando la característica más importante
+model_both <- lm(medv ~ 1, data=train_data)
+
+# Realizamos la selección hacia adelante
+model_both <- step(model_both, scope=formula(model_full), direction="both")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_both <- predict(model_both, newdata=test_data)
+rmse_both <- sqrt(mean((test_data$medv - pred_both)^2))
+rmse_both
+```
+```{r}
+summary(model_backward)
+plot(model_backward)
+hist(Boston$medv)
+```
+```{r}
+plot(~ lstat + rm + ptratio + dis + nox + chas + black + rad + 
+    tax + crim + zn,data = Boston)
+```
+
