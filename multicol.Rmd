@@ -1,0 +1,201 @@
+---
+title: "Multicolinealidad"
+author: "Sergio Nava"
+date: "2023-05-4"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(car)
+```
+
+##  VIF
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+data(mtcars)
+
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(123)
+ind <- sample(2, nrow(mtcars), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- mtcars[ind == 1, ]
+test_data <- mtcars[ind == 2, ]
+
+# Ajustamos diferentes modelos de regresión lineal múltiple con diferentes combinaciones de características
+model1 <- lm(mpg ~ wt + disp + hp, data=train_data)
+model2 <- lm(mpg ~ wt + disp, data=train_data)
+model3 <- lm(mpg ~ wt + hp, data=train_data)
+
+# Calculamos el AIC de cada modelo
+(AIC1 <- AIC(model1))
+(AIC2 <- AIC(model2))
+(AIC3 <- AIC(model3))
+
+# Seleccionamos el modelo con el menor AIC
+if(AIC1 < AIC2 & AIC1 < AIC3) {
+  model_best <- model1
+} else if(AIC2 < AIC1 & AIC2 < AIC3) {
+  model_best <- model2
+} else {
+  model_best <- model3
+}
+
+# Evaluamos el desempeño del modelo seleccionado utilizando el conjunto de prueba
+pred_best <- predict(model_best, newdata=test_data)
+rmse_best <- sqrt(mean((test_data$mpg - pred_best)^2))
+rmse_best
+
+```
+
+
+```{r}
+vif(model1)
+vif(model2)
+vif(model3)
+vif(lm(mpg ~ disp + hp, data=train_data))
+plot(mtcars[,c("wt","disp","hp")])
+cor(mtcars[,c("wt","disp","hp")])
+```
+
+
+
+## Selección de variables (características)
+
+
+
+Primero, cargamos el conjunto de datos `mtcars` y lo dividimos en un conjunto de entrenamiento y un conjunto de prueba:
+
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+data(mtcars)
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(123)
+ind <- sample(2, nrow(mtcars), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- mtcars[ind == 1, ]
+test_data <- mtcars[ind == 2, ]
+```
+
+
+
+
+Luego, ajustamos un modelo de regresión lineal múltiple utilizando todas las características disponibles y evaluamos su desempeño utilizando el conjunto de prueba:
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(mpg ~ ., data=train_data)
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_full <- predict(model_full, newdata=test_data)
+rmse_full <- sqrt(mean((test_data$mpg - pred_full)^2))
+rmse_full
+
+vif(model_full)
+```
+
+
+A continuación, realizamos la selección de características utilizando el método de eliminación hacia atrás:
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(mpg ~ ., data=train_data)
+
+# Realizamos la eliminación hacia atrás
+model_backward <- step(model_full, direction="backward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_backward <- predict(model_backward, newdata=test_data)
+rmse_backward <- sqrt(mean((test_data$mpg - pred_backward)^2))
+rmse_backward
+
+vif(model_backward)
+```
+
+
+## Ejercicio (Boston)
+
+```{r}
+data(Boston,package = "MASS")
+```
+
+
+| Variable predictora | Descripción                                       |
+|---------------------|---------------------------------------------------|
+| crim                | Tasa de criminalidad per cápita por zona          |
+| zn                  | Proporción de terrenos residenciales en zonas de   |
+|                     | más de 25,000 pies cuadrados por zona              |
+| indus               | Proporción de acres comerciales no minoristas     |
+|                     | por zona                                          |
+| chas                | Variable ficticia del río Charles (= 1 si la zona |
+|                     | limita con el río; 0 en caso contrario)            |
+| nox                 | Concentración de óxidos nítricos (partes por 10    |
+|                     | millones)                                        |
+| rm                  | Número medio de habitaciones por vivienda         |
+| age                 | Proporción de unidades ocupadas por sus           |
+|                     | propietarios construidas antes de 1940             |
+| dis                 | Distancias ponderadas a cinco centros de empleo    |
+| rad                 | Índice de accesibilidad a carreteras radiales      |
+| tax                 | Tasa de impuesto a la propiedad por valor en $     |
+| ptratio             | Proporción alumno-profesor por zona               |
+| black               | Proporción de negros por zona                      |
+| lstat               | Porcentaje de la población de bajo estatus social  |
+|                     | por zona                                          |
+| medv                | Valor mediano de las viviendas ocupadas por sus    |
+|                     | propietarios en $1,000s                           |
+
+
+```{r}
+# Cargamos el conjunto de datos mtcars
+
+# Dividimos el conjunto de datos en entrenamiento y prueba
+set.seed(1233)
+ind <- sample(2, nrow(Boston), replace=TRUE, prob=c(0.7, 0.3))
+train_data <- Boston[ind == 1, ]
+test_data <- Boston[ind == 2, ]
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(medv ~ ., data=train_data)
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_full <- predict(model_full, newdata=test_data)
+rmse_full <- sqrt(mean((test_data$medv - pred_full)^2))
+rmse_full
+
+vif(model_full)
+```
+
+
+
+```{r}
+# Ajustamos un modelo de regresión lineal múltiple utilizando todas las características
+model_full <- lm(medv ~ ., data=train_data)
+
+# Realizamos la eliminación hacia atrás
+model_backward <- step(model_full, direction="backward")
+
+# Evaluamos el desempeño del modelo utilizando el conjunto de prueba
+pred_backward <- predict(model_backward, newdata=test_data)
+rmse_backward <- sqrt(mean((test_data$medv - pred_backward)^2))
+rmse_backward
+
+vif(model_backward)
+```
+
+```{r}
+summary(model_backward)
+plot(model_backward)
+hist(Boston$medv)
+```
+```{r}
+plot(~ lstat + rm + ptratio + dis + nox + chas + black + rad + 
+    tax + crim + zn,data = Boston)
+cor(Boston[,c("lstat","rm","ptratio","dis","nox","chas","black","rad","tax","crim","zn")])
+hist(Boston$tax)
+```
+

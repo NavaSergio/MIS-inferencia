@@ -15,3 +15,5 @@ modelo2 <- lm((mpg^lambda - 1) / lambda ~ wt, data = mtcars)
 
 # Imprimir resumen del modelo
 summary(modelo2)
+plot(modelo1,which =1)
+plot(modelo2,which =1)
