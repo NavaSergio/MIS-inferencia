@@ -1,0 +1,83 @@
+---
+title: "Modelos Confiabilidad Paramétrica"
+output: html_notebook
+---
+
+
+```{r}
+exponencial <- function(rate=1,from=0,to=20){
+  h <- function(x,rate){
+    resultado <- ifelse(x>0,rate,rate)
+    return(resultado)
+  }
+  H <- function(x,rate){
+    return(rate*x)
+  }
+  nf <- layout( matrix(c(1,2,3,4), nrow=2, byrow=TRUE) )
+  curve(dexp(t,rate=rate),from=from, to=to,
+        ylab="f(t)",xname = "t")
+  curve(1-pexp(t,rate=rate),from=from, to=to,
+        ylab="S(t) o R(t)",xname = "t")
+  curve(h(t,rate=rate),from=from, to=to,
+        ylab="h(t)",xname = "t")
+  curve(H(t,rate=rate),from=from, to=to,
+        ylab="H(t)",xname = "t")
+
+}
+exponencial(rate=2,from=0,to=5)
+```
+
+
+
+
+```{r}
+weibull <- function(shape, scale = 1,from=0,to=20){
+  R <- function(x,shape,scale){
+    return(1-pweibull(x,shape , scale))
+  }
+  h <- function(t,shape,scale){
+    return(dweibull(t,shape, scale = scale)/R(t,shape, scale = scale))
+  }
+  H <- function(x,shape,scale=1){
+    return(-pweibull(x, shape, scale, lower = FALSE, log = TRUE))
+  }
+  nf <- layout( matrix(c(1,2,3,4), nrow=2, byrow=TRUE) )
+  curve(dweibull(t,shape, scale = scale),from=from, to=to,
+        ylab="f(t)",xname = "t")
+  curve(1-pweibull(t,shape, scale = scale),from=from, to=to,
+        ylab="S(t) o R(t)",xname = "t")
+  curve(h(t,shape, scale = scale),from=from, to=to,
+        ylab="h(t)",xname = "t")
+  curve(H(t,shape, scale = scale),from=from, to=to,
+        ylab="H(t)",xname = "t")
+
+}
+weibull(shape=3, scale = 15,from=0,to=45)
+```
+
+
+
+```{r}
+lognormal <- function(meanlog , sdlog ,from=0,to=20){
+  R <- function(t,meanlog , sdlog ){
+    return(1-plnorm(t, meanlog , sdlog))
+  }
+  h <- function(t,meanlog , sdlog ){
+    return(dlnorm(t, meanlog , sdlog )/R(t, meanlog , sdlog ))
+  }
+  H <- function(t,meanlog , sdlog ){
+    return(-log(R(t,meanlog,sdlog)))
+  }
+  nf <- layout( matrix(c(1,2,3,4), nrow=2, byrow=TRUE) )
+  curve(dlnorm(t, meanlog , sdlog ),from=from, to=to,
+        ylab="f(t)",xname = "t")
+  curve(R(t, meanlog , sdlog ),from=from, to=to,
+        ylab="S(t) o R(t)",xname = "t")
+  curve(h(t,meanlog , sdlog ),from=from, to=to,
+        ylab="h(t)",xname = "t")
+  curve(H(t,meanlog , sdlog ),from=from, to=to,
+        ylab="H(t)",xname = "t")
+
+}
+lognormal(meanlog =3, sdlog=3,from=0,to=30)
+```
